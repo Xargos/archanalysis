@@ -1,4 +1,4 @@
-package pl.archanalysis;
+package pl.archanalysis.pack;
 
 import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Label;
@@ -19,25 +19,25 @@ import static guru.nidi.graphviz.attribute.Rank.RankDir.TOP_TO_BOTTOM;
 import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
 
-public class DependencyDrawer {
+public class PackageDependencyDrawer {
 
-    static void draw(List<PackageAnalysis> packageAnalyses) throws IOException {
+    public static void draw(List<PackageAnalysis> packageAnalyses) throws IOException {
         List<LinkSource> linkSources = packageAnalyses.stream()
                 .map(packageAnalysis -> linkNodes(
                         packageAnalysis.getPackageName(),
                         packageAnalysis.getPackageDependencies()))
                 .collect(Collectors.toList());
 
-        Graph g = graph("example1").directed()
+        Graph g = graph("PackageDependency").directed()
                 .graphAttr()
                 .with(Rank.dir(TOP_TO_BOTTOM))
                 .with(linkSources);
-        Graphviz.fromGraph(g).render(Format.PNG).toFile(new File("example/ex1.png"));
+        Graphviz.fromGraph(g).render(Format.PNG).toFile(new File("example/ClassDependency.png"));
     }
 
     private static Node linkNodes(String packageName, List<PackageDependency> packageDependencies) {
         List<Link> links = packageDependencies.stream()
-                .map(DependencyDrawer::buildLink)
+                .map(PackageDependencyDrawer::buildLink)
                 .collect(Collectors.toList());
         return node(packageName).link(links);
     }

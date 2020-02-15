@@ -4,6 +4,11 @@ import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import pl.archanalysis.clazz.ClassAnalyser;
+import pl.archanalysis.clazz.ClassDependencyDrawer;
+import pl.archanalysis.pack.PackageAnalyser;
+import pl.archanalysis.pack.PackageAnalysis;
+import pl.archanalysis.pack.PackageDependency;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,10 +16,17 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
-import static pl.archanalysis.CircularDependencyAnalyzer.newAnalyzer;
-import static pl.archanalysis.DependencyDrawer.draw;
+import static pl.archanalysis.pack.CircularDependencyAnalyzer.newAnalyzer;
+import static pl.archanalysis.pack.PackageDependencyDrawer.draw;
 
 public class ArchAnalysis {
+
+    public static void drawClassDependencyGraph(String rootPackage, String sourcePath, String pathSeparator) throws IOException {
+        JavaProjectBuilder builder = new JavaProjectBuilder();
+        builder.addSourceTree(new File(sourcePath + rootPackage.replace(".", pathSeparator)));
+
+        ClassDependencyDrawer.draw(ClassAnalyser.analyze(rootPackage, builder));
+    }
 
     public static void drawPackageDependencyGraph(String rootPackage, String sourcePath, String pathSeparator) throws IOException {
         JavaProjectBuilder builder = new JavaProjectBuilder();

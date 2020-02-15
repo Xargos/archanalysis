@@ -1,4 +1,4 @@
-package pl.archanalysis;
+package pl.archanalysis.pack;
 
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
@@ -12,11 +12,10 @@ import java.util.stream.Stream;
 
 public class PackageAnalyser {
 
-    static List<PackageAnalysis> analyze(String codePackage, int level, JavaProjectBuilder builder) {
+    public static List<PackageAnalysis> analyze(String codePackage, int level, JavaProjectBuilder builder) {
         return builder.getSources().stream()
                 .map(javaSource -> createPackageAnalysis(javaSource, codePackage, level))
                 .reduce(HashMap.empty(), PackageAnalysis::merge, HashMap::merge)
-                .toJavaStream()
                 .map(Tuple2::_2)
                 .collect(Collectors.toList());
     }
@@ -29,7 +28,6 @@ public class PackageAnalyser {
                         .map(ClassUtils::getPackageCanonicalName)
                         .map(s -> levelNode(level, s))
                         .reduce(HashMap.empty(), PackageAnalyser::merge, HashMap::merge)
-                        .toJavaStream()
                         .map(params -> PackageDependency.builder()
                                 .name(params._1())
                                 .count(params._2())
