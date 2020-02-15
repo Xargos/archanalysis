@@ -8,6 +8,6 @@ public class App {
         String codePackage = "pl.demo";
         String sourcePath = "D:\\Programowanie\\archanalysis\\src\\main\\java\\";
         String pathSeparator = "\\";
-        ArchAnalysis.analyze(codePackage, sourcePath, pathSeparator);
+        ArchAnalysis.findCircularDependencyPackages(codePackage, sourcePath, pathSeparator);
     }
 }
