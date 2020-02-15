@@ -1,7 +1,8 @@
 package pl.demo.infrastructure;
 
-import pl.demo.application.Demo;
+import pl.demo.domain.DomainModel;
 
 public class SomeRepository {
-    private Demo demo;
+    private DomainModel domainModel;
+//    private SomeRepository someRepository;
 }
