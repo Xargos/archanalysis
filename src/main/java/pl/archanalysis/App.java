@@ -8,6 +8,6 @@ public class App {
         String codePackage = "pl.demo";
         String sourcePath = "D:\\Programowanie\\archanalysis\\src\\main\\java\\";
         String pathSeparator = "\\";
-        ArchAnalysis.drawClassDependencyGraph(codePackage, sourcePath, pathSeparator);
+        ArchAnalysis.drawPackageDependencyGraph(codePackage, sourcePath, pathSeparator);
     }
 }

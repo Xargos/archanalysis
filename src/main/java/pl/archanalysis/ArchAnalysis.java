@@ -7,8 +7,6 @@ import io.vavr.Tuple2;
 import pl.archanalysis.clazz.ClassAnalyser;
 import pl.archanalysis.clazz.ClassDependencyDrawer;
 import pl.archanalysis.pack.PackageAnalyser;
-import pl.archanalysis.pack.PackageAnalysis;
-import pl.archanalysis.pack.PackageDependency;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +30,7 @@ public class ArchAnalysis {
         JavaProjectBuilder builder = new JavaProjectBuilder();
         builder.addSourceTree(new File(sourcePath + rootPackage.replace(".", pathSeparator)));
 
-        List<PackageAnalysis> analyzedPackages = analyzePackageLevel(rootPackage, builder);
+        List<DependencyAnalysis> analyzedPackages = analyzePackageLevel(rootPackage, builder);
 
         draw(analyzedPackages);
     }
@@ -52,15 +50,15 @@ public class ArchAnalysis {
                 .forEach(System.out::println);
     }
 
-    private static boolean onlyCircular(Tuple2<String, List<PackageAnalysis>> packageAnalyses) {
+    private static boolean onlyCircular(Tuple2<String, List<DependencyAnalysis>> packageAnalyses) {
         return packageAnalyses._2().stream()
                 .anyMatch(packageAnalysis -> packageAnalysis
-                        .getPackageDependencies().stream().anyMatch(PackageDependency::isCircular));
+                        .getDependencies().stream().anyMatch(Dependency::isCircular));
     }
 
-    private static List<PackageAnalysis> analyzePackageLevel(String rootPackage, JavaProjectBuilder builder) {
+    private static List<DependencyAnalysis> analyzePackageLevel(String rootPackage, JavaProjectBuilder builder) {
         int level = rootPackage.split("\\.").length + 1;
-        List<PackageAnalysis> packageAnalyses = PackageAnalyser.analyze(rootPackage, level, builder);
+        List<DependencyAnalysis> packageAnalyses = PackageAnalyser.analyze(rootPackage, level, builder);
         return newAnalyzer(packageAnalyses).analyze();
     }
 

@@ -9,6 +9,8 @@ import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Link;
 import guru.nidi.graphviz.model.LinkSource;
 import guru.nidi.graphviz.model.Node;
+import pl.archanalysis.Dependency;
+import pl.archanalysis.DependencyAnalysis;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,28 +23,28 @@ import static guru.nidi.graphviz.model.Factory.node;
 
 public class PackageDependencyDrawer {
 
-    public static void draw(List<PackageAnalysis> packageAnalyses) throws IOException {
+    public static void draw(List<DependencyAnalysis> packageAnalyses) throws IOException {
         List<LinkSource> linkSources = packageAnalyses.stream()
                 .map(packageAnalysis -> linkNodes(
-                        packageAnalysis.getPackageName(),
-                        packageAnalysis.getPackageDependencies()))
+                        packageAnalysis.getName(),
+                        packageAnalysis.getDependencies()))
                 .collect(Collectors.toList());
 
         Graph g = graph("PackageDependency").directed()
                 .graphAttr()
                 .with(Rank.dir(TOP_TO_BOTTOM))
                 .with(linkSources);
-        Graphviz.fromGraph(g).render(Format.PNG).toFile(new File("example/ClassDependency.png"));
+        Graphviz.fromGraph(g).render(Format.PNG).toFile(new File("example/PackageDependency.png"));
     }
 
-    private static Node linkNodes(String packageName, List<PackageDependency> packageDependencies) {
+    private static Node linkNodes(String packageName, List<Dependency> packageDependencies) {
         List<Link> links = packageDependencies.stream()
                 .map(PackageDependencyDrawer::buildLink)
                 .collect(Collectors.toList());
         return node(packageName).link(links);
     }
 
-    private static Link buildLink(PackageDependency dep) {
+    private static Link buildLink(Dependency dep) {
         return Link.to(node(dep.getName()))
                 .with(Label.of(dep.getCount().toString()))
                 .with(dep.isCircular() ? Color.RED : Color.BLACK);

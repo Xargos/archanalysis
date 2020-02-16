@@ -3,6 +3,8 @@ package pl.archanalysis.pack;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Set;
+import pl.archanalysis.Dependency;
+import pl.archanalysis.DependencyAnalysis;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -12,22 +14,22 @@ import java.util.stream.Collectors;
 public class CircularDependencyAnalyzer {
 
     private final java.util.List<String> packages;
-    private final Map<String, PackageAnalysis> packageAnalysisMap;
+    private final Map<String, DependencyAnalysis> packageAnalysisMap;
 
-    private CircularDependencyAnalyzer(java.util.List<PackageAnalysis> packageAnalyses) {
+    private CircularDependencyAnalyzer(java.util.List<DependencyAnalysis> packageAnalyses) {
         this.packages = packageAnalyses.stream()
-                .map(PackageAnalysis::getPackageName)
+                .map(DependencyAnalysis::getName)
                 .collect(Collectors.toList());
         this.packageAnalysisMap = packageAnalyses.stream()
-                .map(PackageAnalysis::copy)
-                .collect(Collectors.toMap(PackageAnalysis::getPackageName, Function.identity()));
+                .map(DependencyAnalysis::copy)
+                .collect(Collectors.toMap(DependencyAnalysis::getName, Function.identity()));
     }
 
-    public static CircularDependencyAnalyzer newAnalyzer(java.util.List<PackageAnalysis> packageAnalyses) {
+    public static CircularDependencyAnalyzer newAnalyzer(java.util.List<DependencyAnalysis> packageAnalyses) {
         return new CircularDependencyAnalyzer(packageAnalyses);
     }
 
-    public java.util.List<PackageAnalysis> analyze() {
+    public java.util.List<DependencyAnalysis> analyze() {
         for (int i = 0; i < this.packages.size(); i++) {
             String pack = packages.get(i);
             this.analyze(pack, HashSet.of(pack), io.vavr.collection.List.empty());
@@ -36,22 +38,22 @@ public class CircularDependencyAnalyzer {
         return new ArrayList<>(this.packageAnalysisMap.values());
     }
 
-    private void analyze(String pack, Set<String> visitedPackages, List<PackageDependency> history) {
-        PackageAnalysis packageAnalysis = packageAnalysisMap.get(pack);
+    private void analyze(String pack, Set<String> visitedPackages, List<Dependency> history) {
+        DependencyAnalysis dependencyAnalysis = packageAnalysisMap.get(pack);
 
-        for (PackageDependency packageDependency : packageAnalysis.getPackageDependencies()) {
-            String depName = packageDependency.getName();
+        for (Dependency dependency : dependencyAnalysis.getDependencies()) {
+            String depName = dependency.getName();
             if (visitedPackages.contains(depName)) {
                 this.setCircular(depName, history);
             } else {
                 packages.remove(depName);
-                this.analyze(depName, visitedPackages.add(depName), history.prepend(packageDependency));
+                this.analyze(depName, visitedPackages.add(depName), history.prepend(dependency));
             }
         }
 
     }
 
-    private void setCircular(String depName, List<PackageDependency> deps) {
+    private void setCircular(String depName, List<Dependency> deps) {
         deps.takeUntil(packageDependency -> packageDependency.getName().equalsIgnoreCase(depName))
                 .forEach(dep -> dep.setCircular(true));
     }

@@ -1,22 +1,22 @@
 package pl.archanalysis.pack;
 
-import io.vavr.collection.HashMap;
 import lombok.Builder;
 import lombok.Value;
+import pl.archanalysis.Dependency;
+import pl.archanalysis.DependencyAnalysis;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Value
 @Builder(toBuilder = true)
-public class PackageAnalysis {
+public class PackageAnalysis implements DependencyAnalysis {
     private final String packageName;
-    private final List<PackageDependency> packageDependencies;
+    private final List<Dependency> packageDependencies;
 
-    public PackageAnalysis copy() {
+    @Override
+    public DependencyAnalysis copy() {
         return this.toBuilder()
                 .packageDependencies(this.packageDependencies.stream()
                         .map(packageDependency -> packageDependency.toBuilder().build())
@@ -24,29 +24,18 @@ public class PackageAnalysis {
                 .build();
     }
 
-    public static HashMap<String, PackageAnalysis> merge(HashMap<String, PackageAnalysis> map,
-                                                         PackageAnalysis packageAnalysis) {
-        return map.put(packageAnalysis.getPackageName(),
-                map.get(packageAnalysis.getPackageName())
-                        .map(pA -> mergeDependencies(packageAnalysis, pA))
-                        .getOrElse(() -> packageAnalysis));
+    @Override
+    public String getName() {
+        return packageName;
     }
 
-    private static PackageAnalysis mergeDependencies(PackageAnalysis packageAnalysis, PackageAnalysis pA) {
-        Map<String, PackageDependency> dependencyMap = pA.getPackageDependencies().stream()
-                .collect(Collectors.toMap(PackageDependency::getName, Function.identity()));
-        packageAnalysis.packageDependencies
-                .forEach(packageDependency -> dependencyMap.compute(packageDependency.getName(), (s, packageDependency1) -> merge(packageDependency1, packageDependency)));
-        return packageAnalysis.toBuilder().packageDependencies(new ArrayList<>(dependencyMap.values())).build();
+    @Override
+    public List<Dependency> getDependencies() {
+        return packageDependencies;
     }
 
-    private static PackageDependency merge(PackageDependency original, PackageDependency packageDependency) {
-        if (original == null) {
-            return packageDependency;
-        }
-        return original
-                .toBuilder()
-                .count(original.getCount() + packageDependency.getCount())
-                .build();
+    @Override
+    public DependencyAnalysis copyWithPackageDependencies(List<Dependency> dependencies) {
+        return this.toBuilder().packageDependencies(dependencies).build();
     }
 }

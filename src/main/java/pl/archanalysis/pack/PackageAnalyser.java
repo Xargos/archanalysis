@@ -5,6 +5,9 @@ import com.thoughtworks.qdox.model.JavaSource;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import org.apache.commons.lang3.ClassUtils;
+import pl.archanalysis.Dependency;
+import pl.archanalysis.DependencyAnalysis;
+import pl.archanalysis.DependencyUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,15 +15,15 @@ import java.util.stream.Stream;
 
 public class PackageAnalyser {
 
-    public static List<PackageAnalysis> analyze(String codePackage, int level, JavaProjectBuilder builder) {
+    public static List<DependencyAnalysis> analyze(String codePackage, int level, JavaProjectBuilder builder) {
         return builder.getSources().stream()
                 .map(javaSource -> createPackageAnalysis(javaSource, codePackage, level))
-                .reduce(HashMap.empty(), PackageAnalysis::merge, HashMap::merge)
+                .reduce(HashMap.empty(), DependencyUtils::merge, HashMap::merge)
                 .map(Tuple2::_2)
                 .collect(Collectors.toList());
     }
 
-    private static PackageAnalysis createPackageAnalysis(JavaSource javaSource, String codePath, int level) {
+    private static DependencyAnalysis createPackageAnalysis(JavaSource javaSource, String codePath, int level) {
         return new PackageAnalysis(
                 levelNode(level, javaSource.getPackageName()),
                 javaSource.getImports().stream()
@@ -28,7 +31,7 @@ public class PackageAnalyser {
                         .map(ClassUtils::getPackageCanonicalName)
                         .map(s -> levelNode(level, s))
                         .reduce(HashMap.empty(), PackageAnalyser::merge, HashMap::merge)
-                        .map(params -> PackageDependency.builder()
+                        .map(params -> Dependency.builder()
                                 .name(params._1())
                                 .count(params._2())
                                 .build())
