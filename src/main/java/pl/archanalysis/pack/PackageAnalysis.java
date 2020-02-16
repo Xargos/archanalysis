@@ -5,7 +5,6 @@ import lombok.Value;
 import pl.archanalysis.Dependency;
 import pl.archanalysis.DependencyAnalysis;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

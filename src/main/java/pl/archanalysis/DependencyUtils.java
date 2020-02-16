@@ -15,15 +15,15 @@ import java.util.stream.Collectors;
 public class DependencyUtils {
 
     public static HashMap<String, DependencyAnalysis> merge(HashMap<String, DependencyAnalysis> map,
-                                                            DependencyAnalysis packageAnalysis) {
-        return map.put(packageAnalysis.getName(),
-                map.get(packageAnalysis.getName())
-                        .map(pA -> mergeDependencies(packageAnalysis, pA))
-                        .getOrElse(() -> packageAnalysis));
+                                                            DependencyAnalysis dependencyAnalysis) {
+        return map.put(dependencyAnalysis.getName(),
+                map.get(dependencyAnalysis.getName())
+                        .map(pA -> mergeDependencies(dependencyAnalysis, pA))
+                        .getOrElse(() -> dependencyAnalysis));
     }
 
-    private static DependencyAnalysis mergeDependencies(DependencyAnalysis dependencyAnalysis, DependencyAnalysis pA) {
-        Map<String, Dependency> dependencyMap = pA.getDependencies().stream()
+    private static DependencyAnalysis mergeDependencies(DependencyAnalysis dependencyAnalysis, DependencyAnalysis dA) {
+        Map<String, Dependency> dependencyMap = dA.getDependencies().stream()
                 .collect(Collectors.toMap(Dependency::getName, Function.identity()));
         dependencyAnalysis.getDependencies()
                 .forEach(packageDependency -> dependencyMap.compute(packageDependency.getName(),

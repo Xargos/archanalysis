@@ -5,7 +5,6 @@ import com.thoughtworks.qdox.model.JavaSource;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import pl.archanalysis.clazz.ClassAnalyser;
-import pl.archanalysis.clazz.ClassDependencyDrawer;
 import pl.archanalysis.pack.PackageAnalyser;
 
 import java.io.File;
@@ -14,16 +13,16 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
-import static pl.archanalysis.pack.CircularDependencyAnalyzer.newAnalyzer;
-import static pl.archanalysis.pack.PackageDependencyDrawer.draw;
+import static pl.archanalysis.CircularDependencyAnalyzer.newCircularAnalyzer;
+import static pl.archanalysis.DependencyDrawer.draw;
 
 public class ArchAnalysis {
 
     public static void drawClassDependencyGraph(String rootPackage, String sourcePath, String pathSeparator) throws IOException {
         JavaProjectBuilder builder = new JavaProjectBuilder();
         builder.addSourceTree(new File(sourcePath + rootPackage.replace(".", pathSeparator)));
-
-        ClassDependencyDrawer.draw(ClassAnalyser.analyze(rootPackage, builder));
+        List<DependencyAnalysis> analyses = ClassAnalyser.analyze(rootPackage, builder);
+        draw(newCircularAnalyzer(analyses).analyze(), "ClassDependency");
     }
 
     public static void drawPackageDependencyGraph(String rootPackage, String sourcePath, String pathSeparator) throws IOException {
@@ -32,7 +31,7 @@ public class ArchAnalysis {
 
         List<DependencyAnalysis> analyzedPackages = analyzePackageLevel(rootPackage, builder);
 
-        draw(analyzedPackages);
+        draw(analyzedPackages, "PackageDependency");
     }
 
     public static void findCircularDependencyPackages(String rootPackage, String sourcePath, String pathSeparator) {
@@ -59,7 +58,7 @@ public class ArchAnalysis {
     private static List<DependencyAnalysis> analyzePackageLevel(String rootPackage, JavaProjectBuilder builder) {
         int level = rootPackage.split("\\.").length + 1;
         List<DependencyAnalysis> packageAnalyses = PackageAnalyser.analyze(rootPackage, level, builder);
-        return newAnalyzer(packageAnalyses).analyze();
+        return newCircularAnalyzer(packageAnalyses).analyze();
     }
 
 }

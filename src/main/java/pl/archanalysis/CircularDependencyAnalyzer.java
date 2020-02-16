@@ -1,10 +1,8 @@
-package pl.archanalysis.pack;
+package pl.archanalysis;
 
 import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Set;
-import pl.archanalysis.Dependency;
-import pl.archanalysis.DependencyAnalysis;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -25,7 +23,7 @@ public class CircularDependencyAnalyzer {
                 .collect(Collectors.toMap(DependencyAnalysis::getName, Function.identity()));
     }
 
-    public static CircularDependencyAnalyzer newAnalyzer(java.util.List<DependencyAnalysis> packageAnalyses) {
+    public static CircularDependencyAnalyzer newCircularAnalyzer(java.util.List<DependencyAnalysis> packageAnalyses) {
         return new CircularDependencyAnalyzer(packageAnalyses);
     }
 
@@ -54,7 +52,7 @@ public class CircularDependencyAnalyzer {
     }
 
     private void setCircular(String depName, List<Dependency> deps) {
-        deps.takeUntil(packageDependency -> packageDependency.getName().equalsIgnoreCase(depName))
+        deps.takeUntil(dependency -> dependency.getName().equalsIgnoreCase(depName))
                 .forEach(dep -> dep.setCircular(true));
     }
 }
