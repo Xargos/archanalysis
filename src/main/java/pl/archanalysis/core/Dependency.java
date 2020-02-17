@@ -1,4 +1,4 @@
-package pl.archanalysis;
+package pl.archanalysis.core;
 
 
 import lombok.Builder;

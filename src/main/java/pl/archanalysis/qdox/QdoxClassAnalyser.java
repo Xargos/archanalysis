@@ -1,18 +1,30 @@
-package pl.archanalysis.clazz;
+package pl.archanalysis.qdox;
 
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
-import pl.archanalysis.Dependency;
-import pl.archanalysis.DependencyAnalysis;
+import lombok.RequiredArgsConstructor;
+import pl.archanalysis.core.ClassAnalyser;
+import pl.archanalysis.core.Dependency;
+import pl.archanalysis.core.analysis.ClassAnalysis;
+import pl.archanalysis.core.analysis.DependencyAnalysis;
 
+import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ClassAnalyser {
+@RequiredArgsConstructor
+public class QdoxClassAnalyser implements ClassAnalyser {
 
-    public static List<DependencyAnalysis> analyze(String codePath, JavaProjectBuilder builder) {
+    private final String sourcePath;
+    private final String pathSeparator;
+
+    @Override
+    public List<DependencyAnalysis> analyze(String codePath) {
+        JavaProjectBuilder builder = new JavaProjectBuilder();
+        builder.addSourceTree(new File(sourcePath + codePath.replace(".", pathSeparator)));
+
         return builder.getSources().stream()
-                .map(javaSource -> createClassAnalysis(javaSource, codePath))
+                .map(javaSource -> QdoxClassAnalyser.createClassAnalysis(javaSource, codePath))
                 .collect(Collectors.toList());
     }
 

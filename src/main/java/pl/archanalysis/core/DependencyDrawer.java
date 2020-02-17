@@ -1,4 +1,4 @@
-package pl.archanalysis;
+package pl.archanalysis.core;
 
 import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Label;
@@ -9,6 +9,7 @@ import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Link;
 import guru.nidi.graphviz.model.LinkSource;
 import guru.nidi.graphviz.model.Node;
+import pl.archanalysis.core.analysis.DependencyAnalysis;
 
 import java.io.File;
 import java.io.IOException;

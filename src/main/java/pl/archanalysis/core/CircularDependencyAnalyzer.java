@@ -1,8 +1,9 @@
-package pl.archanalysis;
+package pl.archanalysis.core;
 
 import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Set;
+import pl.archanalysis.core.analysis.DependencyAnalysis;
 
 import java.util.ArrayList;
 import java.util.Map;

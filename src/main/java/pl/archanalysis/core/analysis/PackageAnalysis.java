@@ -1,15 +1,16 @@
-package pl.archanalysis.pack;
+package pl.archanalysis.core.analysis;
 
 import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import pl.archanalysis.Dependency;
-import pl.archanalysis.DependencyAnalysis;
+import pl.archanalysis.core.Dependency;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Value
 @Builder(toBuilder = true)
+@RequiredArgsConstructor
 public class PackageAnalysis implements DependencyAnalysis {
     private final String packageName;
     private final List<Dependency> packageDependencies;

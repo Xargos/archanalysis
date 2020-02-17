@@ -1,5 +1,11 @@
 package pl.archanalysis;
 
+import pl.archanalysis.core.ArchAnalysis;
+import pl.archanalysis.core.ClassAnalyser;
+import pl.archanalysis.core.PackageAnalyser;
+import pl.archanalysis.qdox.QdoxClassAnalyser;
+import pl.archanalysis.qdox.QdoxPackageAnalyser;
+
 import java.io.IOException;
 
 public class App {
@@ -8,6 +14,11 @@ public class App {
         String codePackage = "pl.demo";
         String sourcePath = "D:\\Programowanie\\archanalysis\\src\\main\\java\\";
         String pathSeparator = "\\";
-        ArchAnalysis.findCircularDependencyPackages(codePackage, sourcePath, pathSeparator);
+
+        ClassAnalyser classAnalyser = new QdoxClassAnalyser(sourcePath, pathSeparator);
+        PackageAnalyser packageAnalyser = new QdoxPackageAnalyser(sourcePath, pathSeparator);
+        ArchAnalysis archAnalysis = new ArchAnalysis(classAnalyser, packageAnalyser);
+
+        archAnalysis.drawClassDependencyGraph(codePackage);
     }
 }

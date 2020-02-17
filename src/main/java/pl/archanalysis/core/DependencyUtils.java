@@ -1,9 +1,9 @@
-package pl.archanalysis;
+package pl.archanalysis.core;
 
 import io.vavr.collection.HashMap;
 import lombok.Builder;
 import lombok.Value;
-import pl.archanalysis.pack.PackageAnalysis;
+import pl.archanalysis.core.analysis.DependencyAnalysis;
 
 import java.util.ArrayList;
 import java.util.Map;

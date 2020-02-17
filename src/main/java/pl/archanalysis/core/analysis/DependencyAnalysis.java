@@ -1,4 +1,6 @@
-package pl.archanalysis;
+package pl.archanalysis.core.analysis;
+
+import pl.archanalysis.core.Dependency;
 
 import java.util.List;
 
