@@ -12,14 +12,14 @@ import java.util.stream.Collectors;
 
 public class CircularDependencyAnalyzer {
 
-    private final java.util.List<String> packages;
-    private final Map<String, DependencyAnalysis> packageAnalysisMap;
+    private final java.util.List<String> dependencies;
+    private final Map<String, DependencyAnalysis> dependencyAnalysisMap;
 
-    private CircularDependencyAnalyzer(java.util.List<DependencyAnalysis> packageAnalyses) {
-        this.packages = packageAnalyses.stream()
+    private CircularDependencyAnalyzer(java.util.List<DependencyAnalysis> dependencyAnalyses) {
+        this.dependencies = dependencyAnalyses.stream()
                 .map(DependencyAnalysis::getName)
                 .collect(Collectors.toList());
-        this.packageAnalysisMap = packageAnalyses.stream()
+        this.dependencyAnalysisMap = dependencyAnalyses.stream()
                 .map(DependencyAnalysis::copy)
                 .collect(Collectors.toMap(DependencyAnalysis::getName, Function.identity()));
     }
@@ -29,27 +29,26 @@ public class CircularDependencyAnalyzer {
     }
 
     public java.util.List<DependencyAnalysis> analyze() {
-        for (int i = 0; i < this.packages.size(); i++) {
-            String pack = packages.get(i);
+        for (int i = 0; i < this.dependencies.size(); i++) {
+            String pack = dependencies.get(i);
             this.analyze(pack, HashSet.of(pack), io.vavr.collection.List.empty());
         }
 
-        return new ArrayList<>(this.packageAnalysisMap.values());
+        return new ArrayList<>(this.dependencyAnalysisMap.values());
     }
 
     private void analyze(String pack, Set<String> visitedPackages, List<Dependency> history) {
-        DependencyAnalysis dependencyAnalysis = packageAnalysisMap.get(pack);
+        DependencyAnalysis dependencyAnalysis = dependencyAnalysisMap.get(pack);
 
         for (Dependency dependency : dependencyAnalysis.getDependencies()) {
             String depName = dependency.getName();
             if (visitedPackages.contains(depName)) {
                 this.setCircular(depName, history);
             } else {
-                packages.remove(depName);
+                dependencies.remove(depName);
                 this.analyze(depName, visitedPackages.add(depName), history.prepend(dependency));
             }
         }
-
     }
 
     private void setCircular(String depName, List<Dependency> deps) {
