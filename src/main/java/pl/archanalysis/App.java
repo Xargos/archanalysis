@@ -14,9 +14,13 @@ public class App {
         String pathSeparator = "\\";
 
 //        ClassAnalyser classAnalyser = new QdoxClassAnalyser(sourcePath, pathSeparator);
-        DependencyAnalyser classAnalyser = new JdepsDependencyAnalyser(sourcePath, pathSeparator);
+        DependencyAnalyser classAnalyser = new JdepsDependencyAnalyser(
+                codePackage,
+                "build/libs/archanalysis-0.0.1-SNAPSHOT.jar",
+                "D:\\Program Files\\Java\\jdk-11\\bin\\jdeps");
+
         ArchAnalysis archAnalysis = new ArchAnalysis(classAnalyser);
 
-        archAnalysis.drawPackageDependencyGraph(codePackage);
+        archAnalysis.drawClassDependencyGraph(codePackage);
     }
 }

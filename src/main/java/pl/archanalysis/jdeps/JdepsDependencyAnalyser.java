@@ -1,8 +1,8 @@
 package pl.archanalysis.jdeps;
 
 import lombok.RequiredArgsConstructor;
-import pl.archanalysis.core.analysis.DependencyAnalyser;
 import pl.archanalysis.core.Dependency;
+import pl.archanalysis.core.analysis.DependencyAnalyser;
 import pl.archanalysis.core.analysis.DependencyAnalysis;
 
 import java.io.BufferedReader;
@@ -21,8 +21,9 @@ import static java.util.stream.Collectors.mapping;
 @RequiredArgsConstructor
 public class JdepsDependencyAnalyser implements DependencyAnalyser {
 
-    private final String sourcePath;
-    private final String pathSeparator;
+    private final String packageName;
+    private final String jar;
+    private final String jdeps;
 
     @Override
     public List<DependencyAnalysis> analyze(String codePath) {
@@ -47,7 +48,7 @@ public class JdepsDependencyAnalyser implements DependencyAnalyser {
 
     private Map<String, List<String>> readDependencies() throws IOException {
         Runtime rt = Runtime.getRuntime();
-        String[] commands = {"D:\\Program Files\\Java\\jdk-11\\bin\\jdeps", "-verbose:class", "-e", "\"pl.demo.*\"", "-R", "build/libs/archanalysis-0.0.1-SNAPSHOT.jar"};
+        String[] commands = {jdeps, "-verbose:class", "-e", packageName + ".*", "-R", jar};
         Process proc = rt.exec(commands);
 
         BufferedReader stdInput = new BufferedReader(new
