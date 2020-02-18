@@ -9,42 +9,34 @@ import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Link;
 import guru.nidi.graphviz.model.LinkSource;
 import guru.nidi.graphviz.model.Node;
-import pl.archanalysis.core.analysis.DependencyAnalysis;
+import pl.archanalysis.core.analysis.DependencyAnalysisRoot;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static guru.nidi.graphviz.attribute.Rank.RankDir.TOP_TO_BOTTOM;
 import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
 
 public class DependencyDrawer {
 
-    public static void draw(List<DependencyAnalysis> packageAnalyses,
+    public static void draw(DependencyAnalysisRoot dependencyAnalysisRoot,
                             String graphName) throws IOException {
+        draw(dependencyAnalysisRoot, graphName, DependencyHeatMap.dependSumHeatMap(dependencyAnalysisRoot));
+    }
 
-        Map<String, Long> dependUponCount = packageAnalyses.stream()
-                .flatMap(dependencyAnalysis -> dependencyAnalysis.getDependencies().stream())
-                .map(Dependency::getName)
-                .collect(groupingBy(Function.identity(), counting()));
+    public static void draw(DependencyAnalysisRoot dependencyAnalysisRoot,
+                            String graphName,
+                            DependencyHeatMap heatMapDrawer) throws IOException {
 
-        long maxDependsUpon = dependUponCount.values().stream()
-                .mapToLong(Long::longValue)
-                .max()
-                .getAsLong();
-
-        List<LinkSource> linkSources = packageAnalyses.stream()
+        List<LinkSource> linkSources = dependencyAnalysisRoot.getDependencyAnalysises().stream()
                 .map(packageAnalysis -> linkNodes(
                         packageAnalysis.getName(),
                         packageAnalysis.getDependencies(),
-                        dependUponCount,
-                        maxDependsUpon))
+                        dependencyAnalysisRoot.getDependUponCount(packageAnalysis.getName()),
+                        heatMapDrawer))
                 .collect(Collectors.toList());
 
         Graph g = graph(graphName).directed()
@@ -56,21 +48,15 @@ public class DependencyDrawer {
 
     private static Node linkNodes(String name,
                                   List<Dependency> dependencies,
-                                  Map<String, Long> dependUponCount,
-                                  long maxDependsUpon) {
+                                  Long dependsUpon,
+                                  DependencyHeatMap heatMapDrawer) {
         List<Link> links = dependencies.stream()
                 .map(DependencyDrawer::buildLink)
                 .collect(Collectors.toList());
-        Long dependsUpon = dependUponCount.getOrDefault(name, 0L);
         return node(name)
                 .with(Label.of(name + " " + dependencies.size() + "/" + dependsUpon))
-                .with(heatMap(maxDependsUpon, dependsUpon))
+                .with(heatMapDrawer.heatMap(dependsUpon, dependencies.size()))
                 .link(links);
-    }
-
-    private static Color heatMap(long maxDependsUpon, Long dependsUpon) {
-        int heat = (int) ((dependsUpon * 511D) / maxDependsUpon);
-        return Color.rgb(heat > 255 ? heat - 256 : 0, heat < 256 ? 255 - heat : 0, 0);
     }
 
     private static Link buildLink(Dependency dep) {

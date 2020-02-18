@@ -1,9 +1,8 @@
 package pl.archanalysis.jdeps;
 
 import lombok.RequiredArgsConstructor;
-import pl.archanalysis.core.ClassAnalyser;
+import pl.archanalysis.core.analysis.DependencyAnalyser;
 import pl.archanalysis.core.Dependency;
-import pl.archanalysis.core.analysis.ClassAnalysis;
 import pl.archanalysis.core.analysis.DependencyAnalysis;
 
 import java.io.BufferedReader;
@@ -20,7 +19,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.mapping;
 
 @RequiredArgsConstructor
-public class JdepsClassAnalyser implements ClassAnalyser {
+public class JdepsDependencyAnalyser implements DependencyAnalyser {
 
     private final String sourcePath;
     private final String pathSeparator;
@@ -32,7 +31,7 @@ public class JdepsClassAnalyser implements ClassAnalyser {
             return Stream.of(depsMap.values().stream().flatMap(Collection::stream), depsMap.keySet().stream())
                     .flatMap(Function.identity())
                     .distinct()
-                    .map(clazz -> new ClassAnalysis(
+                    .map(clazz -> new DependencyAnalysis(
                             clazz,
                             depsMap.getOrDefault(clazz, Collections.emptyList()).stream()
                                     .map(name -> Dependency.builder()
