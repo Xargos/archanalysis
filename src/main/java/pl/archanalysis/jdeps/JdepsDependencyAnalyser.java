@@ -1,5 +1,7 @@
 package pl.archanalysis.jdeps;
 
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import lombok.RequiredArgsConstructor;
 import pl.archanalysis.core.Dependency;
 import pl.archanalysis.core.analysis.DependencyAnalyser;
@@ -32,9 +34,9 @@ public class JdepsDependencyAnalyser implements DependencyAnalyser {
             return Stream.of(depsMap.values().stream().flatMap(Collection::stream), depsMap.keySet().stream())
                     .flatMap(Function.identity())
                     .distinct()
-                    .map(clazz -> new DependencyAnalysis(
-                            clazz,
-                            depsMap.getOrDefault(clazz, Collections.emptyList()).stream()
+                    .map(dep -> new DependencyAnalysis(
+                            dep,
+                            depsMap.getOrDefault(dep, Collections.emptyList()).stream()
                                     .map(name -> Dependency.builder()
                                             .name(name)
                                             .count(1)
@@ -66,6 +68,7 @@ public class JdepsDependencyAnalyser implements DependencyAnalyser {
         return stdInput.lines()
                 .skip(1)
                 .map(line -> Stream.of(line.split("->")).map(String::trim).collect(Collectors.toList()))
-                .collect(Collectors.groupingBy(l -> l.get(0), mapping(l -> l.get(1).split(" ")[0], Collectors.toList())));
+                .map(l -> Tuple.of(l.get(0).split("\\$")[0], l.get(1).split(" ")[0]))
+                .collect(Collectors.groupingBy(Tuple2::_1, mapping(Tuple2::_2, Collectors.toList())));
     }
 }
