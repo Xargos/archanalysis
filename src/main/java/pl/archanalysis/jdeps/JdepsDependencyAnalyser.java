@@ -6,7 +6,6 @@ import io.vavr.collection.HashMap;
 import lombok.RequiredArgsConstructor;
 import pl.archanalysis.core.Dependency;
 import pl.archanalysis.core.DependencyUtils;
-import pl.archanalysis.core.PackageAnalyser;
 import pl.archanalysis.core.analysis.DependencyAnalyser;
 import pl.archanalysis.core.analysis.DependencyAnalysis;
 
@@ -34,22 +33,26 @@ public class JdepsDependencyAnalyser implements DependencyAnalyser {
     public List<DependencyAnalysis> analyze(String codePath) {
         try {
             Map<String, List<String>> depsMap = readDependencies();
-            return Stream.of(depsMap.values().stream().flatMap(Collection::stream), depsMap.keySet().stream())
-                    .flatMap(Function.identity())
-                    .distinct()
-                    .map(dep -> new DependencyAnalysis(
-                            dep,
-                            depsMap.getOrDefault(dep, Collections.emptyList()).stream()
-                                    .reduce(HashMap.empty(), DependencyUtils::mergeRaw, HashMap::merge)
-                                    .map(params -> Dependency.builder()
-                                            .name(params._1())
-                                            .count(params._2())
-                                            .build())
-                                    .collect(Collectors.toList())))
-                    .collect(Collectors.toList());
+            return buildDependencyAnalysis(depsMap);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private List<DependencyAnalysis> buildDependencyAnalysis(Map<String, List<String>> depsMap) {
+        return Stream.of(depsMap.values().stream().flatMap(Collection::stream), depsMap.keySet().stream())
+                .flatMap(Function.identity())
+                .distinct()
+                .map(dep -> new DependencyAnalysis(
+                        dep,
+                        depsMap.getOrDefault(dep, Collections.emptyList()).stream()
+                                .reduce(HashMap.empty(), DependencyUtils::mergeRaw, HashMap::merge)
+                                .map(params -> Dependency.builder()
+                                        .name(params._1())
+                                        .count(params._2())
+                                        .build())
+                                .collect(Collectors.toList())))
+                .collect(Collectors.toList());
     }
 
     private Map<String, List<String>> readDependencies() throws IOException {
@@ -60,15 +63,19 @@ public class JdepsDependencyAnalyser implements DependencyAnalyser {
         BufferedReader stdInput = new BufferedReader(new
                 InputStreamReader(proc.getInputStream()));
 
-        BufferedReader stdError = new BufferedReader(new
-                InputStreamReader(proc.getErrorStream()));
+//        BufferedReader stdError = new BufferedReader(new
+//                InputStreamReader(proc.getErrorStream()));
 
-        List<String> errors = stdError.lines()
-                .collect(Collectors.toList());
-        if (!errors.isEmpty()) {
-            throw new RuntimeException(errors.toString());
-        }
+//        List<String> errors = stdError.lines()
+//                .collect(Collectors.toList());
+//        if (!errors.isEmpty()) {
+//            throw new RuntimeException(errors.toString());
+//        }
 
+        return parseJdeps(stdInput);
+    }
+
+    private Map<String, List<String>> parseJdeps(BufferedReader stdInput) {
         return stdInput.lines()
                 .skip(1)
                 .map(line -> Stream.of(line.split("->")).map(String::trim).collect(Collectors.toList()))

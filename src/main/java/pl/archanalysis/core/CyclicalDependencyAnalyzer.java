@@ -10,12 +10,12 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CircularDependencyAnalyzer {
+public class CyclicalDependencyAnalyzer {
 
     private final java.util.List<String> dependencies;
     private final Map<String, DependencyAnalysis> dependencyAnalysisMap;
 
-    private CircularDependencyAnalyzer(java.util.List<DependencyAnalysis> dependencyAnalyses) {
+    private CyclicalDependencyAnalyzer(java.util.List<DependencyAnalysis> dependencyAnalyses) {
         this.dependencies = dependencyAnalyses.stream()
                 .map(DependencyAnalysis::getName)
                 .collect(Collectors.toList());
@@ -24,8 +24,8 @@ public class CircularDependencyAnalyzer {
                 .collect(Collectors.toMap(DependencyAnalysis::getName, Function.identity()));
     }
 
-    public static CircularDependencyAnalyzer newCircularAnalyzer(java.util.List<DependencyAnalysis> packageAnalyses) {
-        return new CircularDependencyAnalyzer(packageAnalyses);
+    public static CyclicalDependencyAnalyzer newCyclicalAnalyzer(java.util.List<DependencyAnalysis> packageAnalyses) {
+        return new CyclicalDependencyAnalyzer(packageAnalyses);
     }
 
     public java.util.List<DependencyAnalysis> analyze() {
@@ -43,16 +43,18 @@ public class CircularDependencyAnalyzer {
         for (Dependency dependency : dependencyAnalysis.getDependencies()) {
             String depName = dependency.getName();
             if (visitedPackages.contains(depName)) {
-                this.setCircular(depName, history);
+                this.setCyclical(depName, history);
             } else {
-                dependencies.remove(depName);
-                this.analyze(depName, visitedPackages.add(depName), history.prepend(dependency));
+                if (dependencies.contains(depName)) {
+                    dependencies.remove(depName);
+                    this.analyze(depName, visitedPackages.add(depName), history.prepend(dependency));
+                }
             }
         }
     }
 
-    private void setCircular(String depName, List<Dependency> deps) {
+    private void setCyclical(String depName, List<Dependency> deps) {
         deps.takeUntil(dependency -> dependency.getName().equalsIgnoreCase(depName))
-                .forEach(dep -> dep.setCircular(true));
+                .forEach(dep -> dep.setCyclical(true));
     }
 }

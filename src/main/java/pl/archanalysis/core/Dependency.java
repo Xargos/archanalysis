@@ -9,5 +9,5 @@ import lombok.Data;
 public class Dependency {
     private final String name;
     private final Integer count;
-    private boolean circular;
+    private boolean cyclical;
 }

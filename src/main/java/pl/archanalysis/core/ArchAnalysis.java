@@ -15,17 +15,19 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
-import static pl.archanalysis.core.CircularDependencyAnalyzer.newCircularAnalyzer;
+import static pl.archanalysis.core.CyclicalDependencyAnalyzer.newCyclicalAnalyzer;
 import static pl.archanalysis.core.DependencyDrawer.draw;
 
 @RequiredArgsConstructor
 public class ArchAnalysis {
 
-    private final DependencyAnalyser classAnalyser;
+    private final DependencyAnalyser dependencyAnalyser;
 
     public void drawClassDependencyGraph(String rootPackage) throws IOException {
-        List<DependencyAnalysis> analyses = classAnalyser.analyze(rootPackage);
-        DependencyAnalysisRoot dependencyAnalysisRoot = DependencyRootAnalyser.analyzeRoot(newCircularAnalyzer(analyses).analyze());
+        List<DependencyAnalysis> analyses = dependencyAnalyser.analyze(rootPackage);
+        List<DependencyAnalysis> cyclicalAnalyzed = newCyclicalAnalyzer(analyses).analyze();
+        DependencyAnalysisRoot dependencyAnalysisRoot = DependencyRootAnalyser.analyzeRoot(cyclicalAnalyzed);
+        System.out.println("drawing");
         draw(dependencyAnalysisRoot, "ClassDependency");
     }
 
@@ -35,7 +37,7 @@ public class ArchAnalysis {
         draw(dependencyAnalysisRoot, "PackageDependency");
     }
 
-    public void findCircularDependencyPackages(String rootPackage, String sourcePath, String pathSeparator) {
+    public void findCyclicalDependencyPackages(String rootPackage, String sourcePath, String pathSeparator) {
         JavaProjectBuilder builder = new JavaProjectBuilder();
         builder.addSourceTree(new File(sourcePath + rootPackage.replace(".", pathSeparator)));
         Stream.of(builder.getSources()
@@ -45,21 +47,21 @@ public class ArchAnalysis {
                 , Stream.of(rootPackage))
                 .flatMap(identity())
                 .map(packageName -> Tuple.of(packageName, analyzePackageLevel(packageName)))
-                .filter(this::onlyCircular)
+                .filter(this::onlyCyclical)
                 .map(Tuple2::_1)
                 .forEach(System.out::println);
     }
 
-    private boolean onlyCircular(Tuple2<String, List<DependencyAnalysis>> packageAnalyses) {
+    private boolean onlyCyclical(Tuple2<String, List<DependencyAnalysis>> packageAnalyses) {
         return packageAnalyses._2().stream()
                 .anyMatch(packageAnalysis -> packageAnalysis
-                        .getDependencies().stream().anyMatch(Dependency::isCircular));
+                        .getDependencies().stream().anyMatch(Dependency::isCyclical));
     }
 
     private List<DependencyAnalysis> analyzePackageLevel(String rootPackage) {
-        List<DependencyAnalysis> classAnalyses = classAnalyser.analyze(rootPackage);
+        List<DependencyAnalysis> classAnalyses = dependencyAnalyser.analyze(rootPackage);
         List<DependencyAnalysis> packageAnalyses = PackageAnalyser.analyze(rootPackage, classAnalyses);
-        return newCircularAnalyzer(packageAnalyses).analyze();
+        return newCyclicalAnalyzer(packageAnalyses).analyze();
     }
 
 }

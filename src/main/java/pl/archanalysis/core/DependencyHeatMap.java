@@ -40,7 +40,7 @@ public class DependencyHeatMap {
     }
 
     private Color heatMap(long max, long value) {
-        int heat = (int) ((value * 511D) / max);
-        return Color.rgb(heat > 255 ? heat - 256 : 0, heat < 256 ? 255 - heat : 0, 0);
+        int heat = (int) ((value * 255D) / max);
+        return Color.rgb(heat, 0, 0);
     }
 }

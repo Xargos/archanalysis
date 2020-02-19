@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static guru.nidi.graphviz.attribute.Rank.RankDir.TOP_TO_BOTTOM;
+import static guru.nidi.graphviz.attribute.Rank.RankDir.LEFT_TO_RIGHT;
 import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
 
@@ -41,9 +41,12 @@ public class DependencyDrawer {
 
         Graph g = graph(graphName).directed()
                 .graphAttr()
-                .with(Rank.dir(TOP_TO_BOTTOM))
+                .with(Rank.dir(LEFT_TO_RIGHT))
                 .with(linkSources);
-        Graphviz.fromGraph(g).render(Format.PNG).toFile(new File("example/" + graphName + ".png"));
+        Graphviz.fromGraph(g)
+                .totalMemory(512_000_000)
+                .render(Format.PNG)
+                .toFile(new File("example/" + graphName + ".png"));
     }
 
     private static Node linkNodes(String name,
@@ -62,6 +65,6 @@ public class DependencyDrawer {
     private static Link buildLink(Dependency dep) {
         return Link.to(node(dep.getName()))
                 .with(Label.of(dep.getCount().toString()))
-                .with(dep.isCircular() ? Color.RED : Color.BLACK);
+                .with(dep.isCyclical() ? Color.RED : Color.BLACK);
     }
 }
