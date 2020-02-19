@@ -14,7 +14,14 @@ import java.util.stream.Collectors;
 @Builder(toBuilder = true)
 public class DependencyUtils {
 
-    public static HashMap<String, DependencyAnalysis> merge(HashMap<String, DependencyAnalysis> map,
+    public static HashMap<String, Integer> mergeRaw(HashMap<String, Integer> map, String name) {
+        return map.put(name,
+                map.get(name)
+                        .map(count -> count + 1)
+                        .getOrElse(() -> 1));
+    }
+
+    public static HashMap<String, DependencyAnalysis> mergeDependencies(HashMap<String, DependencyAnalysis> map,
                                                             DependencyAnalysis dependencyAnalysis) {
         return map.put(dependencyAnalysis.getName(),
                 map.get(dependencyAnalysis.getName())

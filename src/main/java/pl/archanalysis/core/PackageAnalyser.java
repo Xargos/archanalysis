@@ -16,7 +16,7 @@ public class PackageAnalyser {
         return dependencyAnalyses.stream()
                 .filter(dependencyAnalysis -> dependencyAnalysis.getPackageCanonicalName().split("\\.").length >= level)
                 .map(dependencyAnalysis -> createPackageAnalysis(dependencyAnalysis, level))
-                .reduce(HashMap.empty(), DependencyUtils::merge, HashMap::merge)
+                .reduce(HashMap.empty(), DependencyUtils::mergeDependencies, HashMap::merge)
                 .map(Tuple2::_2)
                 .collect(Collectors.toList());
     }
@@ -29,7 +29,7 @@ public class PackageAnalyser {
                         .map(ClassUtils::getPackageCanonicalName)
                         .filter(dep -> dep.split("\\.").length >= level)
                         .map(dep -> levelNode(level, dep))
-                        .reduce(HashMap.empty(), PackageAnalyser::merge, HashMap::merge)
+                        .reduce(HashMap.empty(), DependencyUtils::mergeRaw, HashMap::merge)
                         .map(params -> Dependency.builder()
                                 .name(params._1())
                                 .count(params._2())
@@ -42,12 +42,5 @@ public class PackageAnalyser {
         return Stream.of(split)
                 .limit(level)
                 .collect(Collectors.joining("."));
-    }
-
-    private static HashMap<String, Integer> merge(HashMap<String, Integer> map, String name) {
-        return map.put(name,
-                map.get(name)
-                        .map(count -> count + 1)
-                        .getOrElse(() -> 1));
     }
 }
