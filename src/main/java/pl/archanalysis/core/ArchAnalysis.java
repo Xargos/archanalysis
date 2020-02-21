@@ -27,7 +27,7 @@ public class ArchAnalysis {
         List<DependencyAnalysis> analyses = dependencyAnalyser.analyze(rootPackage);
         List<DependencyAnalysis> cyclicalAnalyzed = newCyclicalAnalyzer(analyses).analyze();
         DependencyAnalysisRoot dependencyAnalysisRoot = DependencyRootAnalyser.analyzeRoot(cyclicalAnalyzed);
-        System.out.println("drawing");
+        StatsPrinter.print(dependencyAnalysisRoot);
         draw(dependencyAnalysisRoot, "ClassDependency");
     }
 

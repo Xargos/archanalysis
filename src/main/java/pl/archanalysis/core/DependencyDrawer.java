@@ -30,7 +30,7 @@ public class DependencyDrawer {
     public static void draw(DependencyAnalysisRoot dependencyAnalysisRoot,
                             String graphName,
                             DependencyHotSpotMarker heatMapDrawer) throws IOException {
-
+        System.out.println("drawing");
         List<LinkSource> linkSources = dependencyAnalysisRoot.getDependencyAnalysises().stream()
                 .map(packageAnalysis -> linkNodes(
                         packageAnalysis.getName(),
