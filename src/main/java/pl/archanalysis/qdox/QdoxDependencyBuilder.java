@@ -3,32 +3,37 @@ package pl.archanalysis.qdox;
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
 import lombok.RequiredArgsConstructor;
-import pl.archanalysis.core.analysis.DependencyAnalyser;
+import pl.archanalysis.core.DependencyBuilder;
 import pl.archanalysis.core.Dependency;
-import pl.archanalysis.core.analysis.DependencyAnalysis;
+import pl.archanalysis.core.DependencyNode;
+import pl.archanalysis.core.DependencyRoot;
 
 import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class QdoxDependencyAnalyser implements DependencyAnalyser {
+public class QdoxDependencyBuilder implements DependencyBuilder {
 
     private final String sourcePath;
     private final String pathSeparator;
 
     @Override
-    public List<DependencyAnalysis> analyze(String codePath) {
+    public DependencyRoot analyze(String codePath) {
         JavaProjectBuilder builder = new JavaProjectBuilder();
         builder.addSourceTree(new File(sourcePath + codePath.replace(".", pathSeparator)));
 
-        return builder.getSources().stream()
-                .map(javaSource -> QdoxDependencyAnalyser.createClassAnalysis(javaSource, codePath))
+        List<DependencyNode> dependencyNodes = builder.getSources().stream()
+                .map(javaSource -> QdoxDependencyBuilder.createClassAnalysis(javaSource, codePath))
                 .collect(Collectors.toList());
+
+        return DependencyRoot.builder()
+                .dependencyNodes(dependencyNodes)
+                .build();
     }
 
-    private static DependencyAnalysis createClassAnalysis(JavaSource javaSource, String codePath) {
-        return new DependencyAnalysis(
+    private static DependencyNode createClassAnalysis(JavaSource javaSource, String codePath) {
+        return new DependencyNode(
                 javaSource.getClasses().get(0).getCanonicalName(),
                 javaSource.getImports().stream()
                         .filter(s -> s.startsWith(codePath))

@@ -10,7 +10,6 @@ import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Link;
 import guru.nidi.graphviz.model.LinkSource;
 import guru.nidi.graphviz.model.Node;
-import pl.archanalysis.core.analysis.DependencyAnalysisRoot;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,27 +23,27 @@ import static guru.nidi.graphviz.model.Factory.node;
 
 public class DependencyDrawer {
 
-    public static void draw(DependencyAnalysisRoot dependencyAnalysisRoot,
+    public static void draw(DependencyRoot dependencyRoot,
                             String graphName) throws IOException {
-        draw(dependencyAnalysisRoot, graphName,
-                DependencyHotSpotMarker.dependAllHotSpot(dependencyAnalysisRoot.getRootAnalytics()));
+        draw(dependencyRoot, graphName,
+                DependencyHotSpotMarker.dependAllHotSpot(dependencyRoot.getRootAnalytics()));
     }
 
-    public static void draw(DependencyAnalysisRoot dependencyAnalysisRoot,
+    public static void draw(DependencyRoot dependencyRoot,
                             String graphName,
                             DependencyHotSpotMarker heatMapDrawer) throws IOException {
         System.out.println("drawing");
-        List<LinkSource> linkSources = dependencyAnalysisRoot.getDependencyAnalysises().stream()
+        List<LinkSource> linkSources = dependencyRoot.getDependencyNodes().stream()
                 .map(dependencyAnalysis -> linkNodes(
                         dependencyAnalysis.getName(),
                         dependencyAnalysis.getDependencies(),
-                        dependencyAnalysisRoot.getRootAnalytics().getDependUponCount(dependencyAnalysis.getName()),
+                        dependencyRoot.getRootAnalytics().getDependUponCount(dependencyAnalysis.getName()),
                         heatMapDrawer))
                 .collect(Collectors.toList());
 
         Graph g = graph(graphName).directed()
                 .graphAttr()
-                .with(Rank.dir(TOP_TO_BOTTOM))
+                .with(Rank.dir(LEFT_TO_RIGHT))
                 .with(linkSources);
         Graphviz.fromGraph(g)
                 .totalMemory(512_000_000)
@@ -61,9 +60,17 @@ public class DependencyDrawer {
                 .collect(Collectors.toList());
         return node(name)
                 .with(Label.of(name + " " + dependencies.size() + "/" + dependsUpon))
-                .with(dependsUpon == 0 ? Style.DIAGONALS : Style.SOLID)
+                .with(markRoot(dependsUpon).and(markLeaf(name, dependencies)))
                 .with(heatMapDrawer.heatMap(dependsUpon, dependencies.size()))
                 .link(links);
+    }
+
+    private static Style markLeaf(String name, List<Dependency> dependencies) {
+        return dependencies.stream().allMatch(dep -> dep.getName().equalsIgnoreCase(name)) ? Style.DASHED : Style.SOLID;
+    }
+
+    private static Style markRoot(Long dependsUpon) {
+        return dependsUpon == 0 ? Style.DIAGONALS : Style.SOLID;
     }
 
     private static Link buildLink(Dependency dep) {

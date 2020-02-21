@@ -5,9 +5,9 @@ import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import lombok.RequiredArgsConstructor;
 import pl.archanalysis.core.Dependency;
-import pl.archanalysis.core.DependencyUtils;
-import pl.archanalysis.core.analysis.DependencyAnalyser;
-import pl.archanalysis.core.analysis.DependencyAnalysis;
+import pl.archanalysis.core.DependencyBuilder;
+import pl.archanalysis.core.DependencyNode;
+import pl.archanalysis.core.DependencyRoot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,30 +23,30 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.mapping;
 
 @RequiredArgsConstructor
-public class JdepsDependencyAnalyser implements DependencyAnalyser {
+public class JdepsDependencyBuilder implements DependencyBuilder {
 
     private final String packageName;
     private final String jar;
     private final String jdeps;
 
     @Override
-    public List<DependencyAnalysis> analyze(String codePath) {
+    public DependencyRoot analyze(String codePath) {
         try {
             Map<String, List<String>> depsMap = readDependencies();
-            return buildDependencyAnalysis(depsMap);
+            return DependencyRoot.builder().dependencyNodes(buildDependencyAnalysis(depsMap)).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private List<DependencyAnalysis> buildDependencyAnalysis(Map<String, List<String>> depsMap) {
+    private List<DependencyNode> buildDependencyAnalysis(Map<String, List<String>> depsMap) {
         return Stream.of(depsMap.values().stream().flatMap(Collection::stream), depsMap.keySet().stream())
                 .flatMap(Function.identity())
                 .distinct()
-                .map(dep -> new DependencyAnalysis(
+                .map(dep -> new DependencyNode(
                         dep,
                         depsMap.getOrDefault(dep, Collections.emptyList()).stream()
-                                .reduce(HashMap.empty(), DependencyUtils::mergeRaw, HashMap::merge)
+                                .reduce(HashMap.empty(), JdepsDependencyBuilder::mergeRaw, HashMap::merge)
                                 .map(params -> Dependency.builder()
                                         .name(params._1())
                                         .count(params._2())
@@ -81,5 +81,12 @@ public class JdepsDependencyAnalyser implements DependencyAnalyser {
                 .map(line -> Stream.of(line.split("->")).map(String::trim).collect(Collectors.toList()))
                 .map(l -> Tuple.of(l.get(0).split("\\$")[0], l.get(1).split(" ")[0].split("\\$")[0]))
                 .collect(Collectors.groupingBy(Tuple2::_1, mapping(Tuple2::_2, Collectors.toList())));
+    }
+
+    private static HashMap<String, Integer> mergeRaw(HashMap<String, Integer> map, String name) {
+        return map.put(name,
+                map.get(name)
+                        .map(count -> count + 1)
+                        .getOrElse(() -> 1));
     }
 }

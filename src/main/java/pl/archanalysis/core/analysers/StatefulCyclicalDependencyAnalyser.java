@@ -1,34 +1,36 @@
-package pl.archanalysis.core;
+package pl.archanalysis.core.analysers;
 
 import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Set;
-import pl.archanalysis.core.analysis.DependencyAnalysis;
+import pl.archanalysis.core.Dependency;
+import pl.archanalysis.core.DependencyNode;
+import pl.archanalysis.core.DependencyRoot;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CyclicalDependencyAnalyzer {
+public class StatefulCyclicalDependencyAnalyser {
 
     private final java.util.List<String> dependencies;
-    private final Map<String, DependencyAnalysis> dependencyAnalysisMap;
+    private final Map<String, DependencyNode> dependencyAnalysisMap;
 
-    private CyclicalDependencyAnalyzer(java.util.List<DependencyAnalysis> dependencyAnalyses) {
-        this.dependencies = dependencyAnalyses.stream()
-                .map(DependencyAnalysis::getName)
+    private StatefulCyclicalDependencyAnalyser(java.util.List<DependencyNode> dependencyNodes) {
+        this.dependencies = dependencyNodes.stream()
+                .map(DependencyNode::getName)
                 .collect(Collectors.toList());
-        this.dependencyAnalysisMap = dependencyAnalyses.stream()
-                .map(DependencyAnalysis::copy)
-                .collect(Collectors.toMap(DependencyAnalysis::getName, Function.identity()));
+        this.dependencyAnalysisMap = dependencyNodes.stream()
+                .map(DependencyNode::copy)
+                .collect(Collectors.toMap(DependencyNode::getName, Function.identity()));
     }
 
-    public static CyclicalDependencyAnalyzer newCyclicalAnalyzer(java.util.List<DependencyAnalysis> packageAnalyses) {
-        return new CyclicalDependencyAnalyzer(packageAnalyses);
+    static StatefulCyclicalDependencyAnalyser newCyclicalAnalyzer(DependencyRoot dependencyRoot) {
+        return new StatefulCyclicalDependencyAnalyser(dependencyRoot.getDependencyNodes());
     }
 
-    public java.util.List<DependencyAnalysis> analyze() {
+    java.util.List<DependencyNode> analyze() {
         for (int i = 0; i < this.dependencies.size(); i++) {
             String pack = dependencies.get(i);
             this.analyze(pack, HashSet.of(pack), io.vavr.collection.List.empty());
@@ -38,9 +40,9 @@ public class CyclicalDependencyAnalyzer {
     }
 
     private void analyze(String pack, Set<String> visitedPackages, List<Dependency> history) {
-        DependencyAnalysis dependencyAnalysis = dependencyAnalysisMap.get(pack);
+        DependencyNode dependencyNode = dependencyAnalysisMap.get(pack);
 
-        for (Dependency dependency : dependencyAnalysis.getDependencies()) {
+        for (Dependency dependency : dependencyNode.getDependencies()) {
             String depName = dependency.getName();
             if (visitedPackages.contains(depName)) {
                 this.setCyclical(depName, history);

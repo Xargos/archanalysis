@@ -4,46 +4,57 @@ import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import lombok.RequiredArgsConstructor;
-import pl.archanalysis.core.analysis.DependencyAnalyser;
-import pl.archanalysis.core.analysis.DependencyAnalysis;
-import pl.archanalysis.core.analysis.DependencyAnalysisRoot;
+import pl.archanalysis.core.analysers.CyclicalDependencyAnalyser;
+import pl.archanalysis.core.analysers.DependencyRootAnalyser;
+import pl.archanalysis.core.analysers.PackageAnalyser;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
-import static pl.archanalysis.core.CyclicalDependencyAnalyzer.newCyclicalAnalyzer;
 import static pl.archanalysis.core.DependencyDrawer.draw;
 
-@RequiredArgsConstructor
 public class ArchAnalysis {
 
-    private final DependencyAnalyser dependencyAnalyser;
+    private final String rootPackage;
+    private final DependencyBuilder dependencyBuilder;
     private final Set<String> ignoreClass;
+    private final PackageAnalyser packageAnalyser;
+    private final DependencyRootAnalyser dependencyRootAnalyser = new DependencyRootAnalyser();
+    private final CyclicalDependencyAnalyser cyclicalDependencyAnalyser = new CyclicalDependencyAnalyser();
 
-    public void drawClassDependencyGraph(String rootPackage) throws IOException {
-        List<DependencyAnalysis> analyses = dependencyAnalyser.analyze(rootPackage).stream()
-                .filter(dependencyAnalysis -> !ignoreClass.contains(dependencyAnalysis.getName()))
-                .collect(Collectors.toList());
-        List<DependencyAnalysis> cyclicalAnalyzed = newCyclicalAnalyzer(analyses).analyze();
-        DependencyAnalysisRoot dependencyAnalysisRoot = DependencyRootAnalyser.analyzeRoot(cyclicalAnalyzed);
-        StatsPrinter.print(dependencyAnalysisRoot);
-        draw(dependencyAnalysisRoot, "ClassDependency");
+    public ArchAnalysis(String rootPackage,
+                        DependencyBuilder dependencyBuilder,
+                        Set<String> ignoreClass) {
+        this.rootPackage = rootPackage;
+        this.dependencyBuilder = dependencyBuilder;
+        this.ignoreClass = ignoreClass;
+        this.packageAnalyser = new PackageAnalyser(rootPackage);
     }
 
-    public void drawPackageDependencyGraph(String rootPackage) throws IOException {
-        List<DependencyAnalysis> analyzedPackages = analyzePackageLevel(rootPackage);
-        DependencyAnalysisRoot dependencyAnalysisRoot = DependencyRootAnalyser.analyzeRoot(analyzedPackages);
-        StatsPrinter.print(dependencyAnalysisRoot);
-        draw(dependencyAnalysisRoot, "PackageDependency");
+    public void drawClassDependencyGraph() throws IOException {
+        DependencyRoot dependencyRoot = dependencyBuilder.analyze(rootPackage);
+        dependencyRoot = dependencyRoot.toBuilder().dependencyNodes(
+                dependencyRoot.getDependencyNodes().stream()
+                        .filter(dependencyAnalysis -> !ignoreClass.contains(dependencyAnalysis.getName()))
+                        .collect(Collectors.toList())).build();
+        dependencyRoot = cyclicalDependencyAnalyser.analyze(dependencyRoot);
+        dependencyRoot = dependencyRootAnalyser.analyze(dependencyRoot);
+        StatsPrinter.print(dependencyRoot);
+        draw(dependencyRoot, "ClassDependency");
     }
 
-    public void findCyclicalDependencyPackages(String rootPackage, String sourcePath, String pathSeparator) {
+    public void drawPackageDependencyGraph() throws IOException {
+        DependencyRoot analyzedPackages = analyzePackageLevel();
+        DependencyRoot dependencyRoot = dependencyRootAnalyser.analyze(analyzedPackages);
+        StatsPrinter.print(dependencyRoot);
+        draw(dependencyRoot, "PackageDependency");
+    }
+
+    public void findCyclicalDependencyPackages(String sourcePath, String pathSeparator) {
         JavaProjectBuilder builder = new JavaProjectBuilder();
         builder.addSourceTree(new File(sourcePath + rootPackage.replace(".", pathSeparator)));
         Stream.of(builder.getSources()
@@ -52,22 +63,22 @@ public class ArchAnalysis {
                         .distinct()
                 , Stream.of(rootPackage))
                 .flatMap(identity())
-                .map(packageName -> Tuple.of(packageName, analyzePackageLevel(packageName)))
+                .map(packageName -> Tuple.of(packageName, analyzePackageLevel()))
                 .filter(this::onlyCyclical)
                 .map(Tuple2::_1)
                 .forEach(System.out::println);
     }
 
-    private boolean onlyCyclical(Tuple2<String, List<DependencyAnalysis>> packageAnalyses) {
-        return packageAnalyses._2().stream()
+    private boolean onlyCyclical(Tuple2<String, DependencyRoot> dependencyRootTuple2) {
+        return dependencyRootTuple2._2().getDependencyNodes().stream()
                 .anyMatch(packageAnalysis -> packageAnalysis
                         .getDependencies().stream().anyMatch(Dependency::isCyclical));
     }
 
-    private List<DependencyAnalysis> analyzePackageLevel(String rootPackage) {
-        List<DependencyAnalysis> classAnalyses = dependencyAnalyser.analyze(rootPackage);
-        List<DependencyAnalysis> packageAnalyses = PackageAnalyser.analyze(rootPackage, classAnalyses);
-        return newCyclicalAnalyzer(packageAnalyses).analyze();
+    private DependencyRoot analyzePackageLevel() {
+        DependencyRoot dependencyRoot = dependencyBuilder.analyze(rootPackage);
+        dependencyRoot = packageAnalyser.analyze(dependencyRoot);
+        return cyclicalDependencyAnalyser.analyze(dependencyRoot);
     }
 
 }
