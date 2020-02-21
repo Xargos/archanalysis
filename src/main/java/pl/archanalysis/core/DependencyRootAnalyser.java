@@ -1,10 +1,12 @@
 package pl.archanalysis.core;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import pl.archanalysis.core.analysis.DependencyAnalysis;
 import pl.archanalysis.core.analysis.DependencyAnalysisRoot;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.DoubleStream;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.summingLong;
@@ -16,20 +18,22 @@ public class DependencyRootAnalyser {
                 .flatMap(dependencyAnalysis -> dependencyAnalysis.getDependencies().stream())
                 .collect(groupingBy(Dependency::getName, summingLong(Dependency::getCount)));
 
-        long maxDependsUpon = dependUponCount.values().stream()
-                .mapToLong(Long::longValue)
-                .max()
-                .getAsLong();
+        double[] dependsUpon = dependUponCount.values().stream()
+                .mapToDouble(Long::doubleValue)
+                .toArray();
 
-        int maxDependsOn = dependencyAnalyses.stream()
-                .mapToInt(deps -> deps.getDependencies().stream().mapToInt(Dependency::getCount).sum())
-                .max()
-                .getAsInt();
+        double[] dependsOn = dependencyAnalyses.stream()
+                .mapToDouble(deps -> deps.getDependencies().stream().mapToDouble(Dependency::getCount).sum())
+                .toArray();
+
+        double[] allDepends = DoubleStream.concat(DoubleStream.of(dependsUpon), DoubleStream.of(dependsOn))
+                .toArray();
 
         return new DependencyAnalysisRoot(
-                maxDependsOn,
+                new DescriptiveStatistics(dependsOn),
+                new DescriptiveStatistics(dependsUpon),
+                new DescriptiveStatistics(allDepends),
                 dependUponCount,
-                maxDependsUpon,
                 dependencyAnalyses
         );
     }

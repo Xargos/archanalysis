@@ -24,12 +24,12 @@ public class DependencyDrawer {
 
     public static void draw(DependencyAnalysisRoot dependencyAnalysisRoot,
                             String graphName) throws IOException {
-        draw(dependencyAnalysisRoot, graphName, DependencyHeatMap.dependSumHeatMap(dependencyAnalysisRoot));
+        draw(dependencyAnalysisRoot, graphName, DependencyHotSpotMarker.dependSumHeatMap(dependencyAnalysisRoot));
     }
 
     public static void draw(DependencyAnalysisRoot dependencyAnalysisRoot,
                             String graphName,
-                            DependencyHeatMap heatMapDrawer) throws IOException {
+                            DependencyHotSpotMarker heatMapDrawer) throws IOException {
 
         List<LinkSource> linkSources = dependencyAnalysisRoot.getDependencyAnalysises().stream()
                 .map(packageAnalysis -> linkNodes(
@@ -52,7 +52,7 @@ public class DependencyDrawer {
     private static Node linkNodes(String name,
                                   List<Dependency> dependencies,
                                   Long dependsUpon,
-                                  DependencyHeatMap heatMapDrawer) {
+                                  DependencyHotSpotMarker heatMapDrawer) {
         List<Link> links = dependencies.stream()
                 .map(DependencyDrawer::buildLink)
                 .collect(Collectors.toList());
