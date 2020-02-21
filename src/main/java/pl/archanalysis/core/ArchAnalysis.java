@@ -12,6 +12,8 @@ import pl.archanalysis.core.analysis.DependencyAnalysisRoot;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
@@ -22,9 +24,12 @@ import static pl.archanalysis.core.DependencyDrawer.draw;
 public class ArchAnalysis {
 
     private final DependencyAnalyser dependencyAnalyser;
+    private final Set<String> ignoreClass;
 
     public void drawClassDependencyGraph(String rootPackage) throws IOException {
-        List<DependencyAnalysis> analyses = dependencyAnalyser.analyze(rootPackage);
+        List<DependencyAnalysis> analyses = dependencyAnalyser.analyze(rootPackage).stream()
+                .filter(dependencyAnalysis -> !ignoreClass.contains(dependencyAnalysis.getName()))
+                .collect(Collectors.toList());
         List<DependencyAnalysis> cyclicalAnalyzed = newCyclicalAnalyzer(analyses).analyze();
         DependencyAnalysisRoot dependencyAnalysisRoot = DependencyRootAnalyser.analyzeRoot(cyclicalAnalyzed);
         StatsPrinter.print(dependencyAnalysisRoot);

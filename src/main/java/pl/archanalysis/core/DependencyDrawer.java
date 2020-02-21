@@ -3,6 +3,7 @@ package pl.archanalysis.core;
 import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.Rank;
+import guru.nidi.graphviz.attribute.Style;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static guru.nidi.graphviz.attribute.Rank.RankDir.LEFT_TO_RIGHT;
+import static guru.nidi.graphviz.attribute.Rank.RankDir.TOP_TO_BOTTOM;
 import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
 
@@ -42,7 +44,7 @@ public class DependencyDrawer {
 
         Graph g = graph(graphName).directed()
                 .graphAttr()
-                .with(Rank.dir(LEFT_TO_RIGHT))
+                .with(Rank.dir(TOP_TO_BOTTOM))
                 .with(linkSources);
         Graphviz.fromGraph(g)
                 .totalMemory(512_000_000)
@@ -59,6 +61,7 @@ public class DependencyDrawer {
                 .collect(Collectors.toList());
         return node(name)
                 .with(Label.of(name + " " + dependencies.size() + "/" + dependsUpon))
+                .with(dependsUpon == 0 ? Style.DIAGONALS : Style.SOLID)
                 .with(heatMapDrawer.heatMap(dependsUpon, dependencies.size()))
                 .link(links);
     }
