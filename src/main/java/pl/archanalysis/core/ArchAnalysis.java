@@ -34,6 +34,7 @@ public class ArchAnalysis {
     public void drawPackageDependencyGraph(String rootPackage) throws IOException {
         List<DependencyAnalysis> analyzedPackages = analyzePackageLevel(rootPackage);
         DependencyAnalysisRoot dependencyAnalysisRoot = DependencyRootAnalyser.analyzeRoot(analyzedPackages);
+        StatsPrinter.print(dependencyAnalysisRoot);
         draw(dependencyAnalysisRoot, "PackageDependency");
     }
 

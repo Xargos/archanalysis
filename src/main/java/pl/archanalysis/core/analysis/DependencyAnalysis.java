@@ -24,10 +24,6 @@ public class DependencyAnalysis {
                 .build();
     }
 
-    public String getName() {
-        return name;
-    }
-
     public String getPackageCanonicalName() {
         return ClassUtils.getPackageCanonicalName(name);
     }

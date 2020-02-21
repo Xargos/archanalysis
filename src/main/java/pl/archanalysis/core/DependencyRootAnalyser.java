@@ -3,6 +3,7 @@ package pl.archanalysis.core;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import pl.archanalysis.core.analysis.DependencyAnalysis;
 import pl.archanalysis.core.analysis.DependencyAnalysisRoot;
+import pl.archanalysis.core.analysis.RootAnalytics;
 
 import java.util.List;
 import java.util.Map;
@@ -30,10 +31,11 @@ public class DependencyRootAnalyser {
                 .toArray();
 
         return new DependencyAnalysisRoot(
-                new DescriptiveStatistics(dependsOn),
-                new DescriptiveStatistics(dependsUpon),
-                new DescriptiveStatistics(allDepends),
-                dependUponCount,
+                new RootAnalytics(
+                        new DescriptiveStatistics(dependsOn),
+                        new DescriptiveStatistics(dependsUpon),
+                        new DescriptiveStatistics(allDepends),
+                        dependUponCount),
                 dependencyAnalyses
         );
     }
