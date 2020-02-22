@@ -1,10 +1,10 @@
-package pl.archanalysis.core.analysers;
+package pl.archanalysis.analysers;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import pl.archanalysis.core.model.Dependency;
-import pl.archanalysis.core.model.DependencyNode;
-import pl.archanalysis.core.model.DependencyRoot;
-import pl.archanalysis.core.model.RootAnalytics;
+import pl.archanalysis.model.Dependency;
+import pl.archanalysis.model.DependencyNode;
+import pl.archanalysis.model.DependencyRoot;
+import pl.archanalysis.model.RootAnalytics;
 
 import java.util.List;
 import java.util.Map;

@@ -4,11 +4,11 @@ import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import pl.archanalysis.core.analysers.Analyser;
-import pl.archanalysis.core.analysers.CyclicalDependencyAnalyser;
-import pl.archanalysis.core.analysers.DependencyRootAnalyser;
-import pl.archanalysis.core.model.Dependency;
-import pl.archanalysis.core.model.DependencyRoot;
+import pl.archanalysis.analysers.Analyser;
+import pl.archanalysis.analysers.CyclicalDependencyAnalyser;
+import pl.archanalysis.analysers.DependencyRootAnalyser;
+import pl.archanalysis.model.Dependency;
+import pl.archanalysis.model.DependencyRoot;
 
 import java.io.File;
 import java.io.IOException;

@@ -10,8 +10,8 @@ import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Link;
 import guru.nidi.graphviz.model.LinkSource;
 import guru.nidi.graphviz.model.Node;
-import pl.archanalysis.core.model.Dependency;
-import pl.archanalysis.core.model.DependencyRoot;
+import pl.archanalysis.model.Dependency;
+import pl.archanalysis.model.DependencyRoot;
 
 import java.io.File;
 import java.io.IOException;

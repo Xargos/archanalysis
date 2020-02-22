@@ -1,4 +1,4 @@
-package pl.archanalysis.core.model;
+package pl.archanalysis.model;
 
 import lombok.Value;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;

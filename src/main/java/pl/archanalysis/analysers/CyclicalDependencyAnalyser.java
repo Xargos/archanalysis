@@ -1,6 +1,6 @@
-package pl.archanalysis.core.analysers;
+package pl.archanalysis.analysers;
 
-import pl.archanalysis.core.model.DependencyRoot;
+import pl.archanalysis.model.DependencyRoot;
 
 public class CyclicalDependencyAnalyser implements Analyser {
 

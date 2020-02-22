@@ -4,18 +4,15 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import lombok.RequiredArgsConstructor;
-import pl.archanalysis.core.model.Dependency;
 import pl.archanalysis.core.DependencyBuilder;
-import pl.archanalysis.core.model.DependencyNode;
-import pl.archanalysis.core.model.DependencyRoot;
+import pl.archanalysis.model.Dependency;
+import pl.archanalysis.model.DependencyNode;
+import pl.archanalysis.model.DependencyRoot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,9 +28,20 @@ public class JdepsDependencyBuilder implements DependencyBuilder {
 
     @Override
     public DependencyRoot analyze(String codePath) {
+        return analyze(codePath, Collections.emptySet());
+    }
+
+    @Override
+    public DependencyRoot analyze(String codePath, Set<String> ignoreClass) {
         try {
             Map<String, List<String>> depsMap = readDependencies();
-            return DependencyRoot.builder().dependencyNodes(buildDependencyAnalysis(depsMap)).build();
+
+            List<DependencyNode> dependencyNodes = buildDependencyAnalysis(depsMap)
+                    .stream()
+                    .filter(dependencyAnalysis -> !ignoreClass.contains(dependencyAnalysis.getName()))
+                    .collect(Collectors.toList());
+
+            return DependencyRoot.builder().dependencyNodes(dependencyNodes).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

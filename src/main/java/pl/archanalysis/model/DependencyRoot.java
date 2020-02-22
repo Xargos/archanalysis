@@ -1,4 +1,4 @@
-package pl.archanalysis.core.model;
+package pl.archanalysis.model;
 
 import lombok.Builder;
 import lombok.Value;

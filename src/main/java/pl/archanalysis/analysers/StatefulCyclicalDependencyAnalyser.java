@@ -1,11 +1,11 @@
-package pl.archanalysis.core.analysers;
+package pl.archanalysis.analysers;
 
 import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Set;
-import pl.archanalysis.core.model.Dependency;
-import pl.archanalysis.core.model.DependencyNode;
-import pl.archanalysis.core.model.DependencyRoot;
+import pl.archanalysis.model.Dependency;
+import pl.archanalysis.model.DependencyNode;
+import pl.archanalysis.model.DependencyRoot;
 
 import java.util.ArrayList;
 import java.util.Map;

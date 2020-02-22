@@ -1,12 +1,12 @@
-package pl.archanalysis.core.analysers;
+package pl.archanalysis.analysers;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ClassUtils;
-import pl.archanalysis.core.model.Dependency;
-import pl.archanalysis.core.model.DependencyRoot;
-import pl.archanalysis.core.model.DependencyNode;
+import pl.archanalysis.model.Dependency;
+import pl.archanalysis.model.DependencyRoot;
+import pl.archanalysis.model.DependencyNode;
 
 import java.util.List;
 import java.util.stream.Collectors;

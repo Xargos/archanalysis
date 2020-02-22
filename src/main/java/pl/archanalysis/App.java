@@ -1,9 +1,8 @@
 package pl.archanalysis;
 
 import pl.archanalysis.core.ClassAnalysis;
-import pl.archanalysis.core.PackageAnalysis;
 import pl.archanalysis.core.DependencyBuilder;
-import pl.archanalysis.core.analysers.AnalyserFactory;
+import pl.archanalysis.analysers.AnalyserFactory;
 import pl.archanalysis.jdeps.JdepsDependencyBuilder;
 
 import java.io.IOException;

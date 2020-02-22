@@ -1,12 +1,11 @@
 package pl.archanalysis.core;
 
-import pl.archanalysis.core.analysers.Analyser;
-import pl.archanalysis.core.model.DependencyRoot;
+import pl.archanalysis.analysers.Analyser;
+import pl.archanalysis.model.DependencyRoot;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static pl.archanalysis.core.DependencyDrawer.draw;
 
@@ -28,11 +27,7 @@ public class ClassAnalysis {
     }
 
     public void drawClassDependencyGraph() throws IOException {
-        DependencyRoot dependencyRoot = dependencyBuilder.analyze(rootPackage);
-        dependencyRoot = dependencyRoot.toBuilder().dependencyNodes(
-                dependencyRoot.getDependencyNodes().stream()
-                        .filter(dependencyAnalysis -> !ignoreClass.contains(dependencyAnalysis.getName()))
-                        .collect(Collectors.toList())).build();
+        DependencyRoot dependencyRoot = dependencyBuilder.analyze(rootPackage, ignoreClass);
 
         for (Analyser analyser : analysers) {
             dependencyRoot = analyser.analyze(dependencyRoot);

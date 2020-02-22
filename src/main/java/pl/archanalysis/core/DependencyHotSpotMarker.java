@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import pl.archanalysis.core.model.RootAnalytics;
+import pl.archanalysis.model.RootAnalytics;
 
 import static io.vavr.API.*;
 

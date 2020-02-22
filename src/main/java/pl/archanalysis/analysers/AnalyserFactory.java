@@ -1,4 +1,4 @@
-package pl.archanalysis.core.analysers;
+package pl.archanalysis.analysers;
 
 public interface AnalyserFactory {
     static Analyser newPackageAnalyser(String rootPackage) {

@@ -1,4 +1,4 @@
-package pl.archanalysis.core.model;
+package pl.archanalysis.model;
 
 import io.vavr.collection.HashMap;
 import lombok.Builder;

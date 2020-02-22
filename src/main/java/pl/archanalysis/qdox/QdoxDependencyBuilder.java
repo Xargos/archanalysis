@@ -4,12 +4,14 @@ import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
 import lombok.RequiredArgsConstructor;
 import pl.archanalysis.core.DependencyBuilder;
-import pl.archanalysis.core.model.Dependency;
-import pl.archanalysis.core.model.DependencyNode;
-import pl.archanalysis.core.model.DependencyRoot;
+import pl.archanalysis.model.Dependency;
+import pl.archanalysis.model.DependencyNode;
+import pl.archanalysis.model.DependencyRoot;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -20,11 +22,17 @@ public class QdoxDependencyBuilder implements DependencyBuilder {
 
     @Override
     public DependencyRoot analyze(String codePath) {
+        return analyze(codePath, Collections.emptySet());
+    }
+
+    @Override
+    public DependencyRoot analyze(String codePath, Set<String> ignoreClass) {
         JavaProjectBuilder builder = new JavaProjectBuilder();
         builder.addSourceTree(new File(sourcePath + codePath.replace(".", pathSeparator)));
 
         List<DependencyNode> dependencyNodes = builder.getSources().stream()
                 .map(javaSource -> QdoxDependencyBuilder.createClassAnalysis(javaSource, codePath))
+                .filter(dependencyAnalysis -> !ignoreClass.contains(dependencyAnalysis.getName()))
                 .collect(Collectors.toList());
 
         return DependencyRoot.builder()
