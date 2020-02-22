@@ -3,9 +3,9 @@ package pl.archanalysis.core.analysers;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Set;
-import pl.archanalysis.core.Dependency;
-import pl.archanalysis.core.DependencyNode;
-import pl.archanalysis.core.DependencyRoot;
+import pl.archanalysis.core.model.Dependency;
+import pl.archanalysis.core.model.DependencyNode;
+import pl.archanalysis.core.model.DependencyRoot;
 
 import java.util.ArrayList;
 import java.util.Map;

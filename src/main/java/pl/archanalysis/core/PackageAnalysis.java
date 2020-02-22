@@ -4,47 +4,37 @@ import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import pl.archanalysis.core.analysers.Analyser;
 import pl.archanalysis.core.analysers.CyclicalDependencyAnalyser;
 import pl.archanalysis.core.analysers.DependencyRootAnalyser;
-import pl.archanalysis.core.analysers.PackageAnalyser;
+import pl.archanalysis.core.model.Dependency;
+import pl.archanalysis.core.model.DependencyRoot;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
 import static pl.archanalysis.core.DependencyDrawer.draw;
 
-public class ArchAnalysis {
+public class PackageAnalysis {
 
     private final String rootPackage;
     private final DependencyBuilder dependencyBuilder;
     private final Set<String> ignoreClass;
-    private final PackageAnalyser packageAnalyser;
+    private final Analyser packageAnalyser;
     private final DependencyRootAnalyser dependencyRootAnalyser = new DependencyRootAnalyser();
     private final CyclicalDependencyAnalyser cyclicalDependencyAnalyser = new CyclicalDependencyAnalyser();
 
-    public ArchAnalysis(String rootPackage,
-                        DependencyBuilder dependencyBuilder,
-                        Set<String> ignoreClass) {
+    public PackageAnalysis(String rootPackage,
+                           DependencyBuilder dependencyBuilder,
+                           Set<String> ignoreClass,
+                           Analyser packageAnalyser) {
         this.rootPackage = rootPackage;
         this.dependencyBuilder = dependencyBuilder;
         this.ignoreClass = ignoreClass;
-        this.packageAnalyser = new PackageAnalyser(rootPackage);
-    }
-
-    public void drawClassDependencyGraph() throws IOException {
-        DependencyRoot dependencyRoot = dependencyBuilder.analyze(rootPackage);
-        dependencyRoot = dependencyRoot.toBuilder().dependencyNodes(
-                dependencyRoot.getDependencyNodes().stream()
-                        .filter(dependencyAnalysis -> !ignoreClass.contains(dependencyAnalysis.getName()))
-                        .collect(Collectors.toList())).build();
-        dependencyRoot = cyclicalDependencyAnalyser.analyze(dependencyRoot);
-        dependencyRoot = dependencyRootAnalyser.analyze(dependencyRoot);
-        StatsPrinter.print(dependencyRoot);
-        draw(dependencyRoot, "ClassDependency");
+        this.packageAnalyser = packageAnalyser;
     }
 
     public void drawPackageDependencyGraph() throws IOException {

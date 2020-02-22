@@ -4,10 +4,10 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import lombok.RequiredArgsConstructor;
-import pl.archanalysis.core.Dependency;
+import pl.archanalysis.core.model.Dependency;
 import pl.archanalysis.core.DependencyBuilder;
-import pl.archanalysis.core.DependencyNode;
-import pl.archanalysis.core.DependencyRoot;
+import pl.archanalysis.core.model.DependencyNode;
+import pl.archanalysis.core.model.DependencyRoot;
 
 import java.io.BufferedReader;
 import java.io.IOException;

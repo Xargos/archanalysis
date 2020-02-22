@@ -1,10 +1,13 @@
 package pl.archanalysis;
 
-import pl.archanalysis.core.ArchAnalysis;
+import pl.archanalysis.core.ClassAnalysis;
+import pl.archanalysis.core.PackageAnalysis;
 import pl.archanalysis.core.DependencyBuilder;
+import pl.archanalysis.core.analysers.AnalyserFactory;
 import pl.archanalysis.jdeps.JdepsDependencyBuilder;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 public class App {
@@ -32,12 +35,17 @@ public class App {
 
         Set<String> ignoreClass = Set.of(
                 "pl.archanalysis.App",
-                "pl.archanalysis.core.ArchAnalysis");
+                "pl.archanalysis.core.PackageAnalysis"
+        );
 
-        ArchAnalysis archAnalysis = new ArchAnalysis(rootPackage, classAnalyser, ignoreClass);
+        ClassAnalysis classAnalysis = new ClassAnalysis(
+                rootPackage,
+                classAnalyser,
+                ignoreClass,
+                List.of(AnalyserFactory.newDependencyRootAnalyser(), AnalyserFactory.newCyclicalDependencyAnalyser()));
 
         long start = System.nanoTime();
-        archAnalysis.drawClassDependencyGraph();
+        classAnalysis.drawClassDependencyGraph();
         System.out.println("Finished in: " + (System.nanoTime() - start) / 1_000_000_000D);
 
     }
