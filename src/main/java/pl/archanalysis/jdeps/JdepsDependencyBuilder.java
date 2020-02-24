@@ -36,10 +36,10 @@ public class JdepsDependencyBuilder implements DependencyBuilder {
         try {
             Map<String, List<String>> depsMap = readDependencies();
 
-            List<DependencyNode> dependencyNodes = buildDependencyAnalysis(depsMap)
+            Map<String, DependencyNode> dependencyNodes = buildDependencyAnalysis(depsMap)
                     .stream()
                     .filter(dependencyAnalysis -> !ignoreClass.contains(dependencyAnalysis.getName()))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toMap(DependencyNode::getName, Function.identity()));
 
             return DependencyRoot.builder().dependencyNodes(dependencyNodes).build();
         } catch (IOException e) {

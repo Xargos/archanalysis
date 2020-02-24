@@ -60,7 +60,7 @@ public class PackageAnalysis {
     }
 
     private boolean onlyCyclical(Tuple2<String, DependencyRoot> dependencyRootTuple2) {
-        return dependencyRootTuple2._2().getDependencyNodes().stream()
+        return dependencyRootTuple2._2().getDependencyNodes().values().stream()
                 .anyMatch(packageAnalysis -> packageAnalysis
                         .getDependencies().stream().anyMatch(Dependency::isCyclical));
     }

@@ -41,7 +41,9 @@ public class App {
                 rootPackage,
                 classAnalyser,
                 ignoreClass,
-                List.of(AnalyserFactory.newDependencyRootAnalyser(), AnalyserFactory.newCyclicalDependencyAnalyser()));
+                List.of(AnalyserFactory.newDependencyRootAnalyser(),
+                        AnalyserFactory.newCyclicalDependencyAnalyser(),
+                        AnalyserFactory.newModuleMarkerAnalyser()));
 
         long start = System.nanoTime();
         classAnalysis.drawClassDependencyGraph();

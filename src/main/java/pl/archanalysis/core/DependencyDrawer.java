@@ -12,6 +12,7 @@ import guru.nidi.graphviz.model.LinkSource;
 import guru.nidi.graphviz.model.Node;
 import pl.archanalysis.model.Dependency;
 import pl.archanalysis.model.DependencyRoot;
+import pl.archanalysis.model.RootAnalytics;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,20 +27,25 @@ public class DependencyDrawer {
 
     public static void draw(DependencyRoot dependencyRoot,
                             String graphName) throws IOException {
-        draw(dependencyRoot, graphName,
-                DependencyHotSpotMarker.dependAllHotSpot(dependencyRoot.getRootAnalytics()));
+        draw(
+                dependencyRoot,
+                graphName,
+                LabelDrawer.dependAllHotSpot(dependencyRoot.getRootAnalytics()),
+                ModuleDrawer.newModuleDrawer(dependencyRoot));
     }
 
     public static void draw(DependencyRoot dependencyRoot,
                             String graphName,
-                            DependencyHotSpotMarker heatMapDrawer) throws IOException {
+                            LabelDrawer labelDrawer,
+                            ModuleDrawer moduleDrawer) throws IOException {
         System.out.println("drawing");
-        List<LinkSource> linkSources = dependencyRoot.getDependencyNodes().stream()
-                .map(dependencyAnalysis -> linkNodes(
-                        dependencyAnalysis.getName(),
-                        dependencyAnalysis.getDependencies(),
-                        dependencyRoot.getRootAnalytics().getDependUponCount(dependencyAnalysis.getName()),
-                        heatMapDrawer))
+        List<LinkSource> linkSources = dependencyRoot.getDependencyNodes().values().stream()
+                .map(dependencyNode -> linkNodes(
+                        dependencyNode.getName(),
+                        dependencyNode.getDependencies(),
+                        dependencyRoot.getRootAnalytics(),
+                        labelDrawer,
+                        moduleDrawer))
                 .collect(Collectors.toList());
 
         Graph g = graph(graphName).directed()
@@ -54,15 +60,16 @@ public class DependencyDrawer {
 
     private static Node linkNodes(String name,
                                   List<Dependency> dependencies,
-                                  Long dependsUpon,
-                                  DependencyHotSpotMarker heatMapDrawer) {
+                                  RootAnalytics rootAnalytics,
+                                  LabelDrawer labelDrawer,
+                                  ModuleDrawer moduleDrawer) {
         List<Link> links = dependencies.stream()
                 .map(DependencyDrawer::buildLink)
                 .collect(Collectors.toList());
         return node(name)
-                .with(Label.of(name + " " + dependencies.size() + "/" + dependsUpon))
-                .with(markRoot(dependsUpon).and(markLeaf(name, dependencies)))
-                .with(heatMapDrawer.heatMap(dependsUpon, dependencies.size()))
+                .with(markRoot(rootAnalytics.isRoot(name)).and(markLeaf(name, dependencies)))
+                .with(labelDrawer.draw(name, rootAnalytics.getDependUponCount(name), dependencies.size()))
+                .with(moduleDrawer.getColorForModule(name))
                 .link(links);
     }
 
@@ -70,8 +77,8 @@ public class DependencyDrawer {
         return dependencies.stream().allMatch(dep -> dep.getName().equalsIgnoreCase(name)) ? Style.DASHED : Style.SOLID;
     }
 
-    private static Style markRoot(Long dependsUpon) {
-        return dependsUpon == 0 ? Style.DIAGONALS : Style.SOLID;
+    private static Style markRoot(boolean isRoot) {
+        return isRoot ? Style.DIAGONALS : Style.SOLID;
     }
 
     private static Link buildLink(Dependency dep) {

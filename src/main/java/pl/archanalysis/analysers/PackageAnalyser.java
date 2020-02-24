@@ -5,10 +5,12 @@ import io.vavr.collection.HashMap;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ClassUtils;
 import pl.archanalysis.model.Dependency;
-import pl.archanalysis.model.DependencyRoot;
 import pl.archanalysis.model.DependencyNode;
+import pl.archanalysis.model.DependencyRoot;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,11 +22,12 @@ public class PackageAnalyser implements Analyser {
     @Override
     public DependencyRoot analyze(DependencyRoot dependencyRoot) {
         return dependencyRoot.toBuilder()
-                .dependencyNodes(this.analyze(dependencyRoot.getDependencyNodes()))
+                .dependencyNodes(this.analyze(dependencyRoot.getDependencyNodes().values()).stream()
+                        .collect(Collectors.toMap(DependencyNode::getName, Function.identity())))
                 .build();
     }
 
-    private List<DependencyNode> analyze(List<DependencyNode> dependencyAnalyses) {
+    private List<DependencyNode> analyze(Collection<DependencyNode> dependencyAnalyses) {
         int level = rootPackage.split("\\.").length + 1;
         return dependencyAnalyses.stream()
                 .filter(dependencyAnalysis -> dependencyAnalysis.getPackageCanonicalName().split("\\.").length >= level)

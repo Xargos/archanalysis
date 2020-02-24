@@ -17,11 +17,9 @@ public class StatefulCyclicalDependencyAnalyser {
     private final java.util.List<String> dependencies;
     private final Map<String, DependencyNode> dependencyAnalysisMap;
 
-    private StatefulCyclicalDependencyAnalyser(java.util.List<DependencyNode> dependencyNodes) {
-        this.dependencies = dependencyNodes.stream()
-                .map(DependencyNode::getName)
-                .collect(Collectors.toList());
-        this.dependencyAnalysisMap = dependencyNodes.stream()
+    private StatefulCyclicalDependencyAnalyser(java.util.Map<String, DependencyNode> dependencyNodes) {
+        this.dependencies = new ArrayList<>(dependencyNodes.keySet());
+        this.dependencyAnalysisMap = dependencyNodes.values().stream()
                 .map(DependencyNode::copy)
                 .collect(Collectors.toMap(DependencyNode::getName, Function.identity()));
     }
@@ -30,13 +28,13 @@ public class StatefulCyclicalDependencyAnalyser {
         return new StatefulCyclicalDependencyAnalyser(dependencyRoot.getDependencyNodes());
     }
 
-    java.util.List<DependencyNode> analyze() {
+    java.util.Map<String, DependencyNode> analyze() {
         for (int i = 0; i < this.dependencies.size(); i++) {
             String pack = dependencies.get(i);
             this.analyze(pack, HashSet.of(pack), io.vavr.collection.List.empty());
         }
 
-        return new ArrayList<>(this.dependencyAnalysisMap.values());
+        return this.dependencyAnalysisMap;
     }
 
     private void analyze(String pack, Set<String> visitedPackages, List<Dependency> history) {

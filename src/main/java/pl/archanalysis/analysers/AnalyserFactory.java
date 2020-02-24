@@ -12,4 +12,8 @@ public interface AnalyserFactory {
     static Analyser newCyclicalDependencyAnalyser() {
         return new CyclicalDependencyAnalyser();
     }
+
+    static Analyser newModuleMarkerAnalyser() {
+        return new ModuleMarkerAnalyser();
+    }
 }

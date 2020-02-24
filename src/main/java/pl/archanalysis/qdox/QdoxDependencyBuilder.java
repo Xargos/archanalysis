@@ -11,7 +11,9 @@ import pl.archanalysis.model.DependencyRoot;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -30,10 +32,10 @@ public class QdoxDependencyBuilder implements DependencyBuilder {
         JavaProjectBuilder builder = new JavaProjectBuilder();
         builder.addSourceTree(new File(sourcePath + codePath.replace(".", pathSeparator)));
 
-        List<DependencyNode> dependencyNodes = builder.getSources().stream()
+        Map<String, DependencyNode> dependencyNodes = builder.getSources().stream()
                 .map(javaSource -> QdoxDependencyBuilder.createClassAnalysis(javaSource, codePath))
                 .filter(dependencyAnalysis -> !ignoreClass.contains(dependencyAnalysis.getName()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(DependencyNode::getName, Function.identity()));
 
         return DependencyRoot.builder()
                 .dependencyNodes(dependencyNodes)

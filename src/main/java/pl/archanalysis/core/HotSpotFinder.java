@@ -12,7 +12,7 @@ public class HotSpotFinder {
     public static List<DependencyNode> find(DependencyRoot dependencyRoot) {
         RootAnalytics rootAnalytics = dependencyRoot.getRootAnalytics();
         double distance = calculateStdDevDistance(rootAnalytics.getAllDepends());
-        return dependencyRoot.getDependencyNodes().stream()
+        return dependencyRoot.getDependencyNodes().values().stream()
                 .filter(dependencyAnalysis -> testHotSpot(distance, rootAnalytics, dependencyAnalysis))
                 .collect(Collectors.toList());
     }

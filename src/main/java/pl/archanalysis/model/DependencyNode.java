@@ -21,10 +21,14 @@ public class DependencyNode {
 
     public DependencyNode copy() {
         return this.toBuilder()
-                .dependencies(this.dependencies.stream()
-                        .map(dependency -> dependency.toBuilder().build())
-                        .collect(Collectors.toList()))
+                .dependencies(copyDependencyList(this.dependencies))
                 .build();
+    }
+
+    private List<Dependency> copyDependencyList(List<Dependency> p) {
+        return p.stream()
+                .map(dependency -> dependency.toBuilder().build())
+                .collect(Collectors.toList());
     }
 
     public String getPackageCanonicalName() {
