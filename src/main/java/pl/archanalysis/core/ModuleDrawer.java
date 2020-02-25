@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ModuleDrawer {
     private final Map<String, Integer> moduleColorMapping;
-    private final Map<String, String> predictedModule;
+    private final Map<String, Set<String>> nodesRoots;
 
     static ModuleDrawer newModuleDrawer(DependencyRoot dependencyRoot) {
         RootAnalytics rootAnalytics = dependencyRoot.getRootAnalytics();
-        int colorStep = 16777216 / (rootAnalytics.getRoots().size() + 2); // Black is for moduless plus we don't want to get to white color
+        int colorStep = 16777216 / (rootAnalytics.getRoots().size() + 3); // Black is for moduless plus we don't want to get to white color
         int color = colorStep;
         Map<String, Integer> moduleColorMapping = new HashMap<>();
         for (String root : getModuleNames(dependencyRoot, rootAnalytics)) {
@@ -28,7 +28,7 @@ public class ModuleDrawer {
         }
 
         return new ModuleDrawer(moduleColorMapping,
-                dependencyRoot.getRootAnalytics().getPredictedModule());
+                dependencyRoot.getRootAnalytics().getNodesRoots());
     }
 
     private static Set<String> getModuleNames(DependencyRoot dependencyRoot, RootAnalytics rootAnalytics) {
@@ -39,8 +39,11 @@ public class ModuleDrawer {
     }
 
     public Color getColorForModule(String name) {
-        return Color.rgb(moduleColorMapping.getOrDefault(predictedModule.get(name), 0));
+        Set<String> roots = nodesRoots.get(name);
+        if(roots.size() > 1) {
+            return Color.BLACK;
+        } else {
+            return Color.rgb(moduleColorMapping.getOrDefault(roots.toArray(new String[1])[0], 0));
+        }
     }
-
-
 }

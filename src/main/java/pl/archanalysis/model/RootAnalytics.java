@@ -18,7 +18,7 @@ public class RootAnalytics {
     private final Map<String, Long> dependUponCount;
     private final Map<String, Set<String>> dependencyUponMap;
     private final Set<String> roots;
-    private final Map<String, String> predictedModule;
+    private final Map<String, Set<String>> nodesRoots;
 
     public Long getDependUponCount(String name) {
         return dependUponCount.getOrDefault(name, 0L);

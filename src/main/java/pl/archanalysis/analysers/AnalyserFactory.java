@@ -1,9 +1,6 @@
 package pl.archanalysis.analysers;
 
 public interface AnalyserFactory {
-    static Analyser newPackageAnalyser(String rootPackage) {
-        return new PackageAnalyser(rootPackage);
-    }
 
     static Analyser newDependencyRootAnalyser() {
         return new DependencyRootAnalyser();

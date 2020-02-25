@@ -1,4 +1,4 @@
-package pl.archanalysis.analysers;
+package pl.archanalysis.core;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
@@ -15,11 +15,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
-public class PackageAnalyser implements Analyser {
+public class PackageBuilder {
 
     private final String rootPackage;
 
-    @Override
     public DependencyRoot analyze(DependencyRoot dependencyRoot) {
         return dependencyRoot.toBuilder()
                 .dependencyNodes(this.analyze(dependencyRoot.getDependencyNodes().values()).stream()
